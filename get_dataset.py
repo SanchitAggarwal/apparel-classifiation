@@ -43,7 +43,8 @@ if __name__ == '__main__':
             os.mkdir(label_directory)
 
     for index, row in data_df.iterrows():
-        print "downloading image.. %s-%s " %(row[label_column],row[url_column])
+        print "%s downloading image.. %s - %s " %(index, row[label_column],row[url_column])
         label_directory = os.path.join(dataset_directory,row[label_column])
         image_name = os.path.join(label_directory, row[url_column].split('/')[-1])
-        urllib.urlretrieve(row[url_column], image_name)
+        if not os.path.exists(image_name):
+            urllib.urlretrieve(row[url_column], image_name)
