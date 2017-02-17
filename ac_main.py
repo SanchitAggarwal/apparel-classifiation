@@ -104,17 +104,147 @@ def getUpperBody(image):
     print ("Number of Upper Body Detected: {}".format(len(final_upperbody)))
     return final_upperbody
 
+
+"""
+# Function to preprocess data frame
+"""
+def extractDiscriptors(dataframe):
+    # Initiate SIFT detector
+    print "initializing sift detector"
+    # sift = cv2.SIFT()  //obsolete in  opencv 3.1.0
+    sift = cv2.xfeatures2d.SIFT_create()
+    # extracting sift keypoints and descriptors
+    print "extracting sift keypoints and descriptors..."
+    for index, row in dataframe.iterrows():
+        print "calculating %s-%s features for %s" %(detector,discriptor,row['files'])
+        training_image = cv2.imread(row['files'])
+        # extracting pop code and task code
+        file_parts =  row['files'].split("/")
+        pop_code = file_parts[-2]
+        task_code = file_parts[-1].split("-")[0]
+
+        # find the keypoints and descriptors with SIFT
+        keypoints, descriptors = sift.detectAndCompute(training_image, None)
+        dataframe.loc[index,"pop_code"] = pop_code
+        dataframe.loc[index,"task_code"] = task_code
+        dataframe.loc[index,"keypoints"] = len(keypoints)
+        dataframe.loc[index,"descriptor_width"] = descriptors.shape[1]
+        dataframe.loc[index,"descriptors"] = np.array(descriptors).flatten()
+
+        print "===================================Descriptor original========================================================"
+        print index
+        print descriptors
+        print descriptors.shape[0], descriptors.shape[1]
+        print "====================================Descriptor after flattening======================================================="
+        print np.array(descriptors).flatten()
+        print len(np.array(descriptors).flatten())
+    return dataframe
+
+"""
+# Function to compute codebook
+"""
+def computeCodebook(dataframe):
+    total_keypoints = dataframe["keypoints"].sum()
+    print "total keypoints", total_keypoints
+    nclusters = int(sqrt(total_keypoints))
+    print "total clusters", nclusters
+    feature = zeros((1,dataframe['descriptor_width'].iloc[0]))
+    for index, row in dataframe.iterrows():
+        discriptor = row["descriptors"].reshape(row["keypoints"],row["descriptor_width"])
+        feature = concatenate((feature,discriptor),axis=0)
+    feature =  feature[1:]
+    print "feature generated!"
+    print "===============================FEATURE=========================================="
+    print feature
+    codebook, distortion = vq.kmeans(feature,nclusters,thresh=k_thresh)
+    return codebook
+
+"""
+# Function to compute histogram
+"""
+def computeHistogram(dataframe,codebook):
+    for index, row in dataframe.iterrows():
+        discriptor = row["descriptors"].reshape(row["keypoints"],row["descriptor_width"])
+        code, dist = vq.vq(discriptor, codebook)
+        word_histogram, bin_edges = histogram(code, bins=range(codebook.shape[0] + 1), normed=True)
+        dataframe.loc[index,"histogram"] = word_histogram
+    return dataframe
+
+"""
+# Function to train the model for given pipeline
+"""
+def trainModel(training_set, pipeline):
+    # Learning Model
+    print "learning model"
+    f = vstack(training_set["histogram"].values)
+    print f
+    model = pipeline.fit(f,  training_set["labels"])
+    return model
+
+"""
+# Function to predict from creatives from learned model
+"""
+def predictModel(test_set,model):
+    f = vstack(test_set["histogram"].values)
+    print f
+    predicted = model.predict(f)
+    return predicted
+
+"""
+# Function to save the model
+"""
+def saveModel(model, filename):
+    # save the classifier
+    with open(filename, 'wb') as fid:
+        cPickle.dump(model, fid)
+
+"""
+# Function to read the model
+"""
+def readModel(filename):
+    model = None
+    # load model
+    if os.path.isfile(filename):
+        with open(filename, 'rb') as fid:
+            model = cPickle.load(fid)
+    return model
+
+'''
+Function for prediction and saving results
+'''
+def prediction(descriptor_set, model, codebook, target_labels):
+    print "----prediction----"
+    # computing the visual word histogram for each image using the codebook
+    print "----Computing the histograms---"
+    query_set = computeHistogram(descriptor_set,codebook)
+    print "first 5 histogram"
+    print query_set.head(5)
+
+    query_set["predicted"] = predictModel(query_set,model)
+    print query_set["predicted"]
+
+
+    print(classification_report(query_set["labels"], query_set["predicted"], target_names = target_labels))
+
+     # Save results to output object
+    print "----Saving Results----"
+    output = pd.DataFrame( data={"image":query_set['files'], "actual_label":query_set['labels'], "predicted_label":query_set['predicted']} )
+    filename = output_path + '%s_output.csv'%datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+    output.to_csv(filename, index=False, sep='\t', quoting=3 )
+
 '''
 Function to train model and codebook from given labelled images
 '''
-def getTraining(training_image_folder, split):
+def training(training_image_folder, split):
+    ################## Dataset ############################################
     print "----Reading Image List----"
     imagefiles,labels = getFileList(training_image_folder)
     # get the data frame for training data
     print "----Creating Data Frame----"
     image_dataframe = getDataFrame(imagefiles,labels)
 
-    # extract descriptors for the images
+    ################## Feature Extraction #################################
+    # extract descriptors for the images (compute features)
     print "----Extracting Discriptors----"
     descriptor_dataframe = extractDiscriptors(image_dataframe.copy())
     print "data shape:", descriptor_dataframe.shape
@@ -122,6 +252,7 @@ def getTraining(training_image_folder, split):
     print "first 5 descriptors"
     print descriptor_dataframe.head(5)
 
+    ################## Training and Validation Split #################################
     if split > 0:
         # split into training and validation set
         print "splitting data into training and validation set"
@@ -131,6 +262,8 @@ def getTraining(training_image_folder, split):
     else:
         training_set =  descriptor_dataframe
 
+
+    ################## Coding and Pooling #################################
     # computing the codebook for visual bag-of-words
     print "----Computing the codebook---"
     codebook = computeCodebook(training_set)
@@ -161,24 +294,20 @@ def getTraining(training_image_folder, split):
     # predict for validation set
     if split > 0:
         print "----Validation and Classification Report----"
-        validation_set = computeHistogram(validation_set,codebook)
-        predicted = predictModel(validation_set,model)
         target_labels =  list(set(training_set["labels"]))
-        print target_labels
-        print predicted
-        print validation_set["labels"]
-        print(classification_report(validation_set["labels"], predicted, target_names = target_labels))
+        prediction(validation_set, model, codebook, target_labels)
 
 '''
 Function to predict the class labels from test images
 '''
-def getPrediction(query_image_folder, model, codebook):
+def testing(query_image_folder, model, codebook):
     print "----Reading Image List----"
     imagefiles,labels = getFileList(query_image_folder)
     # get the data frame for training data
     print "----Creating Data Frame----"
     image_dataframe = getDataFrame(imagefiles,labels)
-    # extract descriptors for the images
+
+    # extract descriptors for the images (compute features)
     print "----Extracting Discriptors----"
     descriptor_dataframe = extractDiscriptors(image_dataframe.copy())
     print "data shape:", descriptor_dataframe.shape
@@ -186,25 +315,8 @@ def getPrediction(query_image_folder, model, codebook):
     print "first 5 descriptors"
     print descriptor_dataframe.head(5)
 
-
-    # computing the visual word histogram for each image using the codebook
-    print "----Computing the histograms---"
-    query_set = computeHistogram(descriptor_dataframe,codebook)
-    print "first 5 histogram"
-    print query_set.head(5)
-
-    query_set["predicted"] = predictModel(query_set,model)
-    print query_set["predicted"]
-
-    target_labels =  list(set(query_set["labels"]))
-    print(classification_report(query_set["labels"], query_set["predicted"], target_names = target_labels))
-
-     # Save results to output object
-    print "----Saving Results----"
-    output = pd.DataFrame( data={"pop_code":query_set['pop_code'],"task_code":query_set['task_code'], "predicted":query_set['predicted']} )
-    filename = output_path + '%s_output.csv'%datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-    output.to_csv(filename, index=False, sep='\t', quoting=3 )
-    return query_set
+    target_labels =  list(set(labels))
+    prediction(descriptor_dataframe, model, codebook, target_labels)
 
 
 if __name__ == '__main__':
@@ -219,10 +331,10 @@ if __name__ == '__main__':
             else:
                 split = 0.3 #default
 
-        getTraining(args["training_dataset_folder"],split)
+        training(args["training_dataset_folder"],split)
 
     if args["model_path"] is not None and args["codebook_path"] is not None and args["test_dataset_folder"] is not None:
         model = readModel(args["model_path"])
         codebook = readModel(args["codebook_path"])
         query_image_folder = args["test_dataset_folder"]
-        query_set = getPrediction(test_dataset_folder, model, codebook)
+        testing(test_dataset_folder, model, codebook)
