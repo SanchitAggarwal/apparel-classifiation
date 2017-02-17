@@ -1,5 +1,5 @@
 #!/usr/bin/python
-"""Apparel Attribute Classification"""
+"""Apparel Attribute Classification: get_dataset"""
 
 # import the necessary packages
 import os
@@ -12,21 +12,17 @@ __author__ = "Sanchit Aggarwal"
 __email__ = "sanchitagarwal108@gmail.com"
 
 
-if __name__ == '__main__':
-    # read the data file (training or testing)
-    print "reading data file..."
-    datafile = sys.argv[1]
-    label_column = int(sys.argv[2])
-    url_column = int(sys.argv[3])
-    dataset_path = sys.argv[4]
-
-    print "label_column: ", label_column
-    print "url_column: ", url_column
-    print "data file: ", datafile
+"""
+# Function to download dataset
+"""
+def get_dataset(datafile, label_column, url_column, dataset_path):
     data_df = pd.read_csv(datafile, header=0, delimiter="\t", quoting=3, error_bad_lines=False)
     print "data shape:", data_df.shape
     print "data columns:", data_df.columns.values
     print data_df
+
+    # to reverse dataset
+    # reversed_df = data_df.iloc[::-1]
 
     print "creating dataset directory..."
     dataset_directory = os.path.abspath(dataset_path)
@@ -48,3 +44,20 @@ if __name__ == '__main__':
         image_name = os.path.join(label_directory, row[url_column].split('/')[-1])
         if not os.path.exists(image_name):
             urllib.urlretrieve(row[url_column], image_name)
+
+
+if __name__ == '__main__':
+    # read the data file (training or testing)
+    print "reading data file..."
+    datafile = sys.argv[1]
+    label_column = int(sys.argv[2])
+    url_column = int(sys.argv[3])
+    dataset_path = sys.argv[4]
+
+    print "label_column: ", label_column
+    print "url_column: ", url_column
+    print "data file: ", datafile
+    print "dataset path: ", dataset_path
+
+    # download dataset
+    get_dataset(datafile, label_column, url_column, dataset_path)
