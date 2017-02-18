@@ -8,14 +8,24 @@ import urllib
 import pandas as pd
 import cv2
 import argparse
+import skimage
+import numpy as np
 from imutils.object_detection import non_max_suppression
-
 # doc string
 __author__ = "Sanchit Aggarwal"
 __email__ = "sanchitagarwal108@gmail.com"
 
 
-upperbody_cascade_path = './haarcascades/haarcascade_upperbody.xml'
+# Initiate SIFT detector
+print "initializing sift detector"
+sift = cv2.SIFT()  #obsolete in  opencv 3.1.0
+# sift = cv2.xfeatures2d.SIFT_create()
+
+frontalface_cascade_path = './haarcascades/haarcascade_frontalface_default.xml'
+upperbody_cascade_path = './haarcascades/haarcascade_mcs_upperbody.xml'
+ml_model_path = os.path.join(os.getcwd(),'ml_model')
+output_path = os.path.join(os.getcwd(),'output')
+preprocess_path = os.path.join(os.getcwd(),'preprocess')
 
 """
 parse the command line arguments
@@ -86,14 +96,14 @@ def getDataFrame(datafile, labels):
 """
 To predict and crop upper body from image.
 """
-def getUpperBody(image):
+def getBodyPart(image, cascade, min_size = (30,30)):
     # load cascade
-    upperbody_cascade = cv2.CascadeClassifier(upperbody_cascade_path)
-    upperbody = upperbody_cascade.detectMultiScale(
+    bodypart_cascade = cv2.CascadeClassifier(cascade)
+    bodypart = upperbody_cascade.detectMultiScale(
         image,
         scaleFactor=1.1,
         minNeighbors=5,
-        minSize=(30, 30),
+        minSize=min_size,
         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
     )
     # apply non-maxima suppression to the bounding boxes
@@ -106,39 +116,76 @@ def getUpperBody(image):
 
 
 """
-# Function to preprocess data frame
+To predict and crop faces in the image.
 """
-def extractDiscriptors(dataframe):
-    # Initiate SIFT detector
-    print "initializing sift detector"
-    # sift = cv2.SIFT()  //obsolete in  opencv 3.1.0
-    sift = cv2.xfeatures2d.SIFT_create()
+def predictFaces(image, cascade_path = './haarcascades/haarcascade_frontalface_default.xml'):
+    # load cascade
+    face_cascade = cv2.CascadeClassifier(cascade_path)
+    faces = face_cascade.detectMultiScale(
+        image,
+        scaleFactor=1.1,
+        minNeighbors=5,
+        minSize=(30, 30),
+        flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+    )
+    # apply non-maxima suppression to the bounding boxes
+    # Threshold is used to pick boxes which are fairly overlapping
+    overlapping_faces = np.array([[x, y, x + w, y + h] for (x, y, w, h) in faces])
+    final_faces = non_max_suppression(overlapping_faces, probs=None, overlapThresh=0.65)
+    final_faces = np.array([[x, y, w - x, h - y] for (x, y, w, h) in final_faces])
+    print ("Number of Faces Detected: {}".format(len(final_faces)))
+    return final_faces
+
+
+'''
+Function to extract SIFT descriptors
+'''
+def getSIFT(image):
     # extracting sift keypoints and descriptors
     print "extracting sift keypoints and descriptors..."
+    # find the keypoints and descriptors with SIFT
+    keypoints, descriptors = sift.detectAndCompute(training_image, None)
+
+'''
+Function to extract HoG descriptors
+'''
+def getHoG(image):
+    skimage.feature.hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3), block_norm='L1', visualise=False, transform_sqrt=False, feature_vector=True, normalise=None)
+
+
+"""
+# Function to extract features
+"""
+def extractFeatures(dataframe):
+    print "extracting features..."
     for index, row in dataframe.iterrows():
-        print "calculating %s-%s features for %s" %(detector,discriptor,row['files'])
+        print "%s calculating features for %s" %(index, row['files'])
         training_image = cv2.imread(row['files'])
-        # extracting pop code and task code
-        file_parts =  row['files'].split("/")
-        pop_code = file_parts[-2]
-        task_code = file_parts[-1].split("-")[0]
+        print type(training_image)
+        upperbody = getUpperBody(training_image)
+        for body in upperbody:
+            upperbody_image = drawRectangle(training_image, body, 0, 0, 255)
+            upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
+            # crop upperbody
+            cropped_upperbody = cropImage(training_image, body)
+            image_file_name = os.path.join(preprocess_path, row['files'].split('/')[-1])
+            cropped_image_file_name = os.path.join(preprocess_path, 'cropped_'+ row['files'].split('/')[-1])
+            cv2.imwrite(cropped_image_file_name,cropped_upperbody)
+            cv2.imwrite(image_file_name,upperbody_image)
 
-        # find the keypoints and descriptors with SIFT
-        keypoints, descriptors = sift.detectAndCompute(training_image, None)
-        dataframe.loc[index,"pop_code"] = pop_code
-        dataframe.loc[index,"task_code"] = task_code
-        dataframe.loc[index,"keypoints"] = len(keypoints)
-        dataframe.loc[index,"descriptor_width"] = descriptors.shape[1]
-        dataframe.loc[index,"descriptors"] = np.array(descriptors).flatten()
-
-        print "===================================Descriptor original========================================================"
-        print index
-        print descriptors
-        print descriptors.shape[0], descriptors.shape[1]
-        print "====================================Descriptor after flattening======================================================="
-        print np.array(descriptors).flatten()
-        print len(np.array(descriptors).flatten())
-    return dataframe
+        # cv2.imshow('upperbody',training_image)
+        # cv2.waitKey(1)
+        # dataframe.loc[index,"descriptor_width"] = descriptors.shape[1]
+        # dataframe.loc[index,"descriptors"] = np.array(descriptors).flatten()
+        #
+        # print "===================================Descriptor original========================================================"
+        # print index
+        # print descriptors
+        # print descriptors.shape[0], descriptors.shape[1]
+        # print "====================================Descriptor after flattening======================================================="
+        # print np.array(descriptors).flatten()
+        # print len(np.array(descriptors).flatten())
+    return training_image
 
 """
 # Function to compute codebook
@@ -209,6 +256,29 @@ def readModel(filename):
             model = cPickle.load(fid)
     return model
 
+"""
+To crop the given region in the image.
+"""
+def cropImage( image, region):
+    crop = image[region[1]:region[1] + region[3], region[0]:region[0]+region[2]] #img[y: y + h, x: x + w]
+    return crop
+
+"""
+To draw rectangle in the image.
+"""
+def drawRectangle(image, region, r,g,b):
+    # Draw a rectangle around the faces
+    cv2.rectangle(image, (region[0], region[1]), (region[0]+region[2], region[1]+region[3]), (r, g, b), 2)
+    return image
+
+"""
+To Put text on the given location of the image.
+"""
+def putText(image,text_string,x,y,r,g,b):
+	cv2.putText(image,text_string, (x,y), cv2.FONT_HERSHEY_SIMPLEX, 1, (r,g,b))
+	return image
+
+
 '''
 Function for prediction and saving results
 '''
@@ -245,22 +315,22 @@ def training(training_image_folder, split):
 
     ################## Feature Extraction #################################
     # extract descriptors for the images (compute features)
-    print "----Extracting Discriptors----"
-    descriptor_dataframe = extractDiscriptors(image_dataframe.copy())
-    print "data shape:", descriptor_dataframe.shape
-    print "data columns:", descriptor_dataframe.columns.values
+    print "----Extracting Features----"
+    feature_dataframe = extractFeatures(image_dataframe.copy())
+    print "data shape:", feature_dataframe.shape
+    print "data columns:", feature_dataframe.columns.values
     print "first 5 descriptors"
-    print descriptor_dataframe.head(5)
+    print feature_dataframe.head(5)
 
     ################## Training and Validation Split #################################
     if split > 0:
         # split into training and validation set
         print "splitting data into training and validation set"
-        training_set, validation_set = train_test_split(descriptor_dataframe, test_size = split)
+        training_set, validation_set = train_test_split(feature_dataframe, test_size = split)
         print training_set.shape
         print validation_set.shape
     else:
-        training_set =  descriptor_dataframe
+        training_set =  feature_dataframe
 
 
     ################## Coding and Pooling #################################
