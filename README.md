@@ -124,30 +124,15 @@ Performed different experiments for feature selection and classifier selection. 
 ```
 
 #### **Experiment 1:** *HoG Features + SVM - 30% Validation* ####
-For a quick evaluation purpose, We just used two classes U neck and V neck with 20, 20 images in each set.
+For a quick evaluation purpose, We just used two classes U neck and V neck with 10, 10 images in each set.
 
 *Results*:
 
 |               |precision|  recall|  f1-score|  support|
 | ------------- |:-------:| ------:| --------:|--------:|
-|**Boat Neck**   |0.94      |0.88      |0.91       |455|
-|**chinese collar neck**       |0.95      |0.72      |0.82       |327|
-|**low cut neck**     |0.87      |0.81      |0.84       |349|
-|**Round Collar**  |0.97      |0.85      |0.91       |153|
-|**Round Neck**     |0.98      |0.94      |0.96       |568|
-|**Square Collar**     |0.85      |0.98      |0.91      |1295|
-|**Square Neck**    |0.84      |0.61      |0.71       |132|
-|**U Neck**   |0.91      |0.93      |0.92       |902|
-|**V Neck**   |0.91      |0.93      |0.92       |902|
-|**avg / total**|**0.91**      |**0.90**      |**0.90**      |**4181**|
-
-
-precision    recall  f1-score   support
-
-U neck       1.00      0.50      0.67         2
-V Neck       0.80      1.00      0.89         4
-
-avg / total       0.87      0.83      0.81         6
+|**U Neck**   | 1.00       |0.50        | 0.67        |2|
+|**V Neck**   |0.80      |1.00      | 0.89       |4|
+|**avg / total**|**0.87**      |**0.83**      |**0.81**      |**6**|
 
 
 #### **Conclusion** ###
