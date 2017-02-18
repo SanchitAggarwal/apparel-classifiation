@@ -11,6 +11,15 @@ import argparse
 import skimage
 import numpy as np
 from imutils.object_detection import non_max_suppression
+from sklearn.linear_model import SGDClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+from numpy import zeros, resize, sqrt, histogram, hstack, vstack, savetxt, zeros_like, concatenate
+import time
+from datetime import datetime
+import cPickle
+
 # doc string
 __author__ = "Sanchit Aggarwal"
 __email__ = "sanchitagarwal108@gmail.com"
@@ -23,9 +32,10 @@ sift = cv2.SIFT()  #obsolete in  opencv 3.1.0
 
 frontalface_cascade_path = './haarcascades/haarcascade_frontalface_default.xml'
 upperbody_cascade_path = './haarcascades/haarcascade_mcs_upperbody.xml'
-ml_model_path = os.path.join(os.getcwd(),'ml_model')
-output_path = os.path.join(os.getcwd(),'output')
+ml_model_path = os.path.join(os.getcwd(),'ml_model/')
+output_path = os.path.join(os.getcwd(),'output/')
 preprocess_path = os.path.join(os.getcwd(),'preprocess')
+size = (150,150)
 
 """
 parse the command line arguments
@@ -76,24 +86,6 @@ def getFileList(directory, extension = "jpg"):
     return files,labels
 
 """
-# Function to get dataframe from data file
-"""
-def getDataFrame(datafile, labels):
-    # read the data file (training or testing)
-    print "creating data frame..."
-    data_df = pd.DataFrame()
-    data_df = data_df.astype('object')
-    data_df["files"] = datafile
-    data_df["labels"] = labels
-    data_df["hog_descriptors"] = 0
-    # converting to object data types so to add descriptors
-    data_df = data_df.astype('object')
-    print "data shape:", data_df.shape
-    print "data columns:", data_df.columns.values
-    print data_df.dtypes
-    return data_df
-
-"""
 To predict and crop upper body from image.
 """
 def getBodyPart(image, cascade, min_size = (30,30)):
@@ -127,49 +119,62 @@ def getSIFT(image):
 Function to extract HoG descriptors
 '''
 def getHoG(image):
-    skimage.feature.hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3), block_norm='L1', visualise=False, transform_sqrt=False, feature_vector=True, normalise=None)
+    winSize = (64,64)
+    blockSize = (16,16)
+    blockStride = (8,8)
+    cellSize = (8,8)
+    nbins = 9
+    derivAperture = 1
+    winSigma = 4.
+    histogramNormType = 0
+    L2HysThreshold = 2.0000000000000001e-01
+    gammaCorrection = 0
+    nlevels = 64
+    hog = cv2.HOGDescriptor(winSize,blockSize,blockStride,cellSize,nbins,derivAperture,winSigma,histogramNormType,L2HysThreshold,gammaCorrection,nlevels)
+    winStride = (8,8)
+    padding = (8,8)
+    locations = ((10,20),)
+    hist = hog.compute(image,winStride,padding,locations)
+    # skimage.feature.hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3), block_norm='L1', visualise=False, transform_sqrt=False, feature_vector=True, normalise=None)
+    # print len(hist.flatten())
+    return hist.flatten()
 
 '''
 Function to preprocess image detecting upperbody parts
 '''
 def preprocess_image(image, filename):
+    cropped_upperbody_image = np.empty((0))
     upperbody = getBodyPart(image,upperbody_cascade_path, (30,30))
     for body in upperbody:
-        cropped_upperbody = cropImage(image, body)
-        face = getBodyPart(cropped_upperbody, frontalface_cascade_path, (30,30))
+        cropped_upperbody_image = cropImage(image, body)
+        face = getBodyPart(cropped_upperbody_image, frontalface_cascade_path, (30,30))
         if len(face)>0:
-            upperbody_image = drawRectangle(image, body, 0, 0, 255)
-            upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
-            image_file_name = os.path.join(preprocess_path, filename)
+            cropped_upperbody_image = cv2.resize(cropped_upperbody_image, size)
             cropped_image_file_name = os.path.join(preprocess_path, 'cropped_'+ filename)
-            cv2.imwrite(cropped_image_file_name,cropped_upperbody)
+            cv2.imwrite(cropped_image_file_name,cropped_upperbody_image)
+            # upperbody_image = drawRectangle(image, body, 0, 0, 255)
+            # upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
+            # image_file_name = os.path.join(preprocess_path, filename)
             # cv2.imwrite(image_file_name,upperbody_image)
             break
-    return upperbody_image
-
+    return cropped_upperbody_image
 
 """
 # Function to extract features
 """
-def extractFeatures(dataframe):
+def extractFeatures(imagefiles,labels):
     print "extracting features..."
-    for index, row in dataframe.iterrows():
-        print "%s calculating features for %s" %(index, row['files'])
-        training_image = preprocess_image(cv2.imread(row['files']),row['files'].split('/')[-1])
+    feature_label_list = []
+    for index in range(len(imagefiles)):
+        print "%s calculating features for %s" %(index, imagefiles[index])
+        training_image = preprocess_image(cv2.imread(imagefiles[index]),imagefiles[index].split('/')[-1])
+        if training_image.size:
+            feature_label_list.append([imagefiles[index].split('/')[-1],labels[index], getHoG(training_image)])
 
-        # cv2.imshow('upperbody',training_image)
-        # cv2.waitKey(1)
-        # dataframe.loc[index,"descriptor_width"] = descriptors.shape[1]
-        # dataframe.loc[index,"descriptors"] = np.array(descriptors).flatten()
-        #
-        # print "===================================Descriptor original========================================================"
-        # print index
-        # print descriptors
-        # print descriptors.shape[0], descriptors.shape[1]
-        # print "====================================Descriptor after flattening======================================================="
-        # print np.array(descriptors).flatten()
-        # print len(np.array(descriptors).flatten())
-    return training_image
+    # get the data frame for training data
+    print "----Creating Data Frame----"
+    dataframe = pd.DataFrame(feature_label_list ,columns=['files','labels','features'])
+    return dataframe
 
 """
 # Function to compute codebook
@@ -207,7 +212,7 @@ def computeHistogram(dataframe,codebook):
 def trainModel(training_set, pipeline):
     # Learning Model
     print "learning model"
-    f = vstack(training_set["histogram"].values)
+    f = vstack(training_set["features"].values)
     print f
     model = pipeline.fit(f,  training_set["labels"])
     return model
@@ -216,7 +221,7 @@ def trainModel(training_set, pipeline):
 # Function to predict from creatives from learned model
 """
 def predictModel(test_set,model):
-    f = vstack(test_set["histogram"].values)
+    f = vstack(test_set["features"].values)
     print f
     predicted = model.predict(f)
     return predicted
@@ -262,27 +267,25 @@ def putText(image,text_string,x,y,r,g,b):
 	cv2.putText(image,text_string, (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (r,g,b))
 	return image
 
-
 '''
 Function for prediction and saving results
 '''
-def prediction(descriptor_set, model, codebook, target_labels):
+def prediction(data_set, model, codebook, target_labels):
     print "----prediction----"
-    # computing the visual word histogram for each image using the codebook
-    print "----Computing the histograms---"
-    query_set = computeHistogram(descriptor_set,codebook)
-    print "first 5 histogram"
-    print query_set.head(5)
+    # # computing the visual word histogram for each image using the codebook
+    # print "----Computing the histograms---"
+    # query_set = computeHistogram(data_set,codebook)
+    # print "first 5 histogram"
+    # print query_set.head(5)
 
-    query_set["predicted"] = predictModel(query_set,model)
-    print query_set["predicted"]
+    data_set["predicted"] = predictModel(data_set,model)
+    print data_set["predicted"]
 
-
-    print(classification_report(query_set["labels"], query_set["predicted"], target_names = target_labels))
+    print(classification_report(data_set["labels"], data_set["predicted"], target_names = target_labels))
 
      # Save results to output object
     print "----Saving Results----"
-    output = pd.DataFrame( data={"image":query_set['files'], "actual_label":query_set['labels'], "predicted_label":query_set['predicted']} )
+    output = pd.DataFrame( data={"image":data_set['files'], "actual_label":data_set['labels'], "predicted_label":data_set['predicted']} )
     filename = output_path + '%s_output.csv'%datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     output.to_csv(filename, index=False, sep='\t', quoting=3 )
 
@@ -293,14 +296,11 @@ def training(training_image_folder, split):
     ################## Dataset ############################################
     print "----Reading Image List----"
     imagefiles,labels = getFileList(training_image_folder)
-    # get the data frame for training data
-    print "----Creating Data Frame----"
-    image_dataframe = getDataFrame(imagefiles,labels)
 
     ################## Feature Extraction #################################
     # extract descriptors for the images (compute features)
     print "----Extracting Features----"
-    feature_dataframe = extractFeatures(image_dataframe.copy())
+    feature_dataframe = extractFeatures(imagefiles,labels)
     print "data shape:", feature_dataframe.shape
     print "data columns:", feature_dataframe.columns.values
     print "first 5 descriptors"
@@ -317,21 +317,22 @@ def training(training_image_folder, split):
         training_set =  feature_dataframe
 
 
-    ################## Coding and Pooling #################################
-    # computing the codebook for visual bag-of-words
-    print "----Computing the codebook---"
-    codebook = computeCodebook(training_set)
-
-    # save codebook
-    print "----Saving Codebook----"
-    filename = ml_model_path + '%s_coodebook.pkl'%datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-    saveModel(codebook,filename)
-
-    # computing the visual word histogram for each image using the codebook
-    print "----Computing the histograms---"
-    training_set = computeHistogram(training_set,codebook)
-    print "first 5 histogram"
-    print training_set.head(5)
+    # ################## Coding and Pooling #################################
+    # # computing the codebook for visual bag-of-words
+    # print "----Computing the codebook---"
+    # codebook = computeCodebook(training_set)
+    codebook = ''
+    #
+    # # save codebook
+    # print "----Saving Codebook----"
+    # filename = ml_model_path + '%s_coodebook.pkl'%datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+    # saveModel(codebook,filename)
+    #
+    # # computing the visual word histogram for each image using the codebook
+    # print "----Computing the histograms---"
+    # training_set = computeHistogram(training_set,codebook)
+    # print "first 5 histogram"
+    # print training_set.head(5)
 
     # define the pipeline
     pipeline = Pipeline([
@@ -345,6 +346,7 @@ def training(training_image_folder, split):
     filename = ml_model_path + '%s_model.pkl'%datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     saveModel(model,filename)
 
+
     # predict for validation set
     if split > 0:
         print "----Validation and Classification Report----"
@@ -357,21 +359,18 @@ Function to predict the class labels from test images
 def testing(query_image_folder, model, codebook):
     print "----Reading Image List----"
     imagefiles,labels = getFileList(query_image_folder)
-    # get the data frame for training data
-    print "----Creating Data Frame----"
-    image_dataframe = getDataFrame(imagefiles,labels)
 
+    ################## Feature Extraction #################################
     # extract descriptors for the images (compute features)
-    print "----Extracting Discriptors----"
-    descriptor_dataframe = extractDiscriptors(image_dataframe.copy())
-    print "data shape:", descriptor_dataframe.shape
-    print "data columns:", descriptor_dataframe.columns.values
+    print "----Extracting Features----"
+    feature_dataframe = extractFeatures(imagefiles,labels)
+    print "data shape:", feature_dataframe.shape
+    print "data columns:", feature_dataframe.columns.values
     print "first 5 descriptors"
-    print descriptor_dataframe.head(5)
+    print feature_dataframe.head(5)
 
     target_labels =  list(set(labels))
-    prediction(descriptor_dataframe, model, codebook, target_labels)
-
+    prediction(feature_dataframe, model, codebook, target_labels)
 
 if __name__ == '__main__':
     # parsing arguments

@@ -55,19 +55,21 @@ To remove the false positives of Upper Body detection we find a frontal face ins
 Function to preprocess image detecting upperbody parts
 '''
 def preprocess_image(image, filename):
+    cropped_upperbody_image = np.empty((0))
     upperbody = getBodyPart(image,upperbody_cascade_path, (30,30))
     for body in upperbody:
-        cropped_upperbody = cropImage(image, body)
-        face = getBodyPart(cropped_upperbody, frontalface_cascade_path, (30,30))
+        cropped_upperbody_image = cropImage(image, body)
+        face = getBodyPart(cropped_upperbody_image, frontalface_cascade_path, (30,30))
         if len(face)>0:
-            upperbody_image = drawRectangle(image, body, 0, 0, 255)
-            upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
-            image_file_name = os.path.join(preprocess_path, filename)
+            cropped_upperbody_image = cv2.resize(cropped_upperbody_image, size)
             cropped_image_file_name = os.path.join(preprocess_path, 'cropped_'+ filename)
-            cv2.imwrite(cropped_image_file_name,cropped_upperbody)
+            cv2.imwrite(cropped_image_file_name,cropped_upperbody_image)
+            # upperbody_image = drawRectangle(image, body, 0, 0, 255)
+            # upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
+            # image_file_name = os.path.join(preprocess_path, filename)
             # cv2.imwrite(image_file_name,upperbody_image)
             break
-    return upperbody_image
+    return cropped_upperbody_image
 ```
 
 #### Feature Extraction and Bag of Words Representation: ####
@@ -121,8 +123,8 @@ Performed different experiments for feature selection and classifier selection. 
 
 ```
 
-#### **Experiment 1:** *Bag of Words - HoG Features - 30% Validation* ####
-For this, we use Bag of Words representation for each HoG image.
+#### **Experiment 1:** *HoG Features + SVM - 30% Validation* ####
+For a quick evaluation purpose, We just used two classes U neck and V neck with 20, 20 images in each set.
 
 *Results*:
 
@@ -138,6 +140,14 @@ For this, we use Bag of Words representation for each HoG image.
 |**U Neck**   |0.91      |0.93      |0.92       |902|
 |**V Neck**   |0.91      |0.93      |0.92       |902|
 |**avg / total**|**0.91**      |**0.90**      |**0.90**      |**4181**|
+
+
+precision    recall  f1-score   support
+
+U neck       1.00      0.50      0.67         2
+V Neck       0.80      1.00      0.89         4
+
+avg / total       0.87      0.83      0.81         6
 
 
 #### **Conclusion** ###
