@@ -84,19 +84,14 @@ Pooling: Finally, the quantized vectors are then spatially pooled with spatial p
 # Function to compute codebook
 """
 def computeCodebook(dataframe):
-    total_keypoints = dataframe["keypoints"].sum()
-    print "total keypoints", total_keypoints
-    nclusters = int(sqrt(total_keypoints))
+    total_features = len(dataframe)
+    print "total keypoints", total_features
+    nclusters = int(sqrt(total_features))
     print "total clusters", nclusters
-    feature = zeros((1,dataframe['descriptor_width'].iloc[0]))
-    for index, row in dataframe.iterrows():
-        discriptor = row["descriptors"].reshape(row["keypoints"],row["descriptor_width"])
-        feature = concatenate((feature,discriptor),axis=0)
-    feature =  feature[1:]
-    print "feature generated!"
-    print "===============================FEATURE=========================================="
-    print feature
-    codebook, distortion = vq.kmeans(feature,nclusters,thresh=k_thresh)
+    features = array(dataframe['features'])
+    features = np.concatenate(features).astype(None)
+    print features
+    codebook, distortion = vq.kmeans(features,nclusters,thresh=k_thresh)
     return codebook
 ```
 
@@ -123,16 +118,16 @@ Performed different experiments for feature selection and classifier selection. 
 
 ```
 
-#### **Experiment 1:** *HoG Features + SVM - 30% Validation* ####
-For a quick evaluation purpose, We just used two classes U neck and V neck with 10, 10 images in each set.
+#### **Experiment 1:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
+For a quick evaluation purpose, We just used two classes U neck and V neck with 20, 20 images in each set.
 
 *Results*:
 
 |               |precision|  recall|  f1-score|  support|
 | ------------- |:-------:| ------:| --------:|--------:|
-|**U Neck**   | 1.00       |0.50        | 0.67        |2|
-|**V Neck**   |0.80      |1.00      | 0.89       |4|
-|**avg / total**|**0.87**      |**0.83**      |**0.81**      |**6**|
+|**U Neck**   |  0.67        |0.80        | 0.73         |5|
+|**V Neck**   |0.83     | 0.71         | 0.77      |7|
+|**avg / total**|**0.76**      |**0.75 **      |**0.75 **      |**12**|
 
 
 #### **Conclusion** ###
