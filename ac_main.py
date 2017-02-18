@@ -99,7 +99,7 @@ To predict and crop upper body from image.
 def getBodyPart(image, cascade, min_size = (30,30)):
     # load cascade
     bodypart_cascade = cv2.CascadeClassifier(cascade)
-    bodypart = upperbody_cascade.detectMultiScale(
+    bodyparts = bodypart_cascade.detectMultiScale(
         image,
         scaleFactor=1.1,
         minNeighbors=5,
@@ -108,34 +108,11 @@ def getBodyPart(image, cascade, min_size = (30,30)):
     )
     # apply non-maxima suppression to the bounding boxes
     # Threshold is used to pick boxes which are fairly overlapping
-    overlapping_upperbody = np.array([[x, y, x + w, y + h] for (x, y, w, h) in upperbody])
-    final_upperbody = non_max_suppression(overlapping_upperbody, probs=None, overlapThresh=0.65)
-    final_upperbody = np.array([[x, y, w - x, h - y] for (x, y, w, h) in final_upperbody])
-    print ("Number of Upper Body Detected: {}".format(len(final_upperbody)))
-    return final_upperbody
-
-
-"""
-To predict and crop faces in the image.
-"""
-def predictFaces(image, cascade_path = './haarcascades/haarcascade_frontalface_default.xml'):
-    # load cascade
-    face_cascade = cv2.CascadeClassifier(cascade_path)
-    faces = face_cascade.detectMultiScale(
-        image,
-        scaleFactor=1.1,
-        minNeighbors=5,
-        minSize=(30, 30),
-        flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-    )
-    # apply non-maxima suppression to the bounding boxes
-    # Threshold is used to pick boxes which are fairly overlapping
-    overlapping_faces = np.array([[x, y, x + w, y + h] for (x, y, w, h) in faces])
-    final_faces = non_max_suppression(overlapping_faces, probs=None, overlapThresh=0.65)
-    final_faces = np.array([[x, y, w - x, h - y] for (x, y, w, h) in final_faces])
-    print ("Number of Faces Detected: {}".format(len(final_faces)))
-    return final_faces
-
+    overlapping_bodyparts = np.array([[x, y, x + w, y + h] for (x, y, w, h) in bodyparts])
+    final_bodyparts = non_max_suppression(overlapping_bodyparts, probs=None, overlapThresh=0.65)
+    final_bodyparts = np.array([[x, y, w - x, h - y] for (x, y, w, h) in final_bodyparts])
+    print ("Number of Body Parts Detected: {}".format(len(final_bodyparts)))
+    return final_bodyparts
 
 '''
 Function to extract SIFT descriptors
@@ -152,6 +129,23 @@ Function to extract HoG descriptors
 def getHoG(image):
     skimage.feature.hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3), block_norm='L1', visualise=False, transform_sqrt=False, feature_vector=True, normalise=None)
 
+'''
+Function to preprocess image detecting upperbody parts
+'''
+def preprocess_image(image, filename):
+    upperbody = getBodyPart(image,upperbody_cascade_path, (30,30))
+    for body in upperbody:
+        cropped_upperbody = cropImage(image, body)
+        face = getBodyPart(cropped_upperbody, frontalface_cascade_path, (30,30))
+        if len(face)>0:
+            upperbody_image = drawRectangle(image, body, 0, 0, 255)
+            upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
+            image_file_name = os.path.join(preprocess_path, filename)
+            cropped_image_file_name = os.path.join(preprocess_path, 'cropped_'+ filename)
+            cv2.imwrite(cropped_image_file_name,cropped_upperbody)
+            cv2.imwrite(image_file_name,upperbody_image)
+            break
+
 
 """
 # Function to extract features
@@ -160,18 +154,7 @@ def extractFeatures(dataframe):
     print "extracting features..."
     for index, row in dataframe.iterrows():
         print "%s calculating features for %s" %(index, row['files'])
-        training_image = cv2.imread(row['files'])
-        print type(training_image)
-        upperbody = getUpperBody(training_image)
-        for body in upperbody:
-            upperbody_image = drawRectangle(training_image, body, 0, 0, 255)
-            upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
-            # crop upperbody
-            cropped_upperbody = cropImage(training_image, body)
-            image_file_name = os.path.join(preprocess_path, row['files'].split('/')[-1])
-            cropped_image_file_name = os.path.join(preprocess_path, 'cropped_'+ row['files'].split('/')[-1])
-            cv2.imwrite(cropped_image_file_name,cropped_upperbody)
-            cv2.imwrite(image_file_name,upperbody_image)
+        training_image = preprocess_image(cv2.imread(row['files']),row['files'].split('/')[-1])
 
         # cv2.imshow('upperbody',training_image)
         # cv2.waitKey(1)
@@ -275,7 +258,7 @@ def drawRectangle(image, region, r,g,b):
 To Put text on the given location of the image.
 """
 def putText(image,text_string,x,y,r,g,b):
-	cv2.putText(image,text_string, (x,y), cv2.FONT_HERSHEY_SIMPLEX, 1, (r,g,b))
+	cv2.putText(image,text_string, (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (r,g,b))
 	return image
 
 
