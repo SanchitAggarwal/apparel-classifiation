@@ -35,7 +35,7 @@ def parseArguments():
     ap = argparse.ArgumentParser()
     # this is the root folder for different creatives.
     ap.add_argument("-t", "--training_dataset_folder",required=False, help="Folder for Apparel Atribute Training Dataset.")
-    ap.add_argument("-p", "--test_dataset_folder",required=False, help="Folder for the images to be classified.")
+    ap.add_argument("-p", "--prediction_dataset_folder",required=False, help="Folder for the images to be classified.")
     ap.add_argument("-m", "--model_path",required=False, help="Path of saved model.")
     ap.add_argument("-b", "--codebook_path",required=False, help="Path of saved codebook.")
     ap.add_argument("-v", "--validation",required=False, help="1/0 validation during training")
@@ -143,8 +143,9 @@ def preprocess_image(image, filename):
             image_file_name = os.path.join(preprocess_path, filename)
             cropped_image_file_name = os.path.join(preprocess_path, 'cropped_'+ filename)
             cv2.imwrite(cropped_image_file_name,cropped_upperbody)
-            cv2.imwrite(image_file_name,upperbody_image)
+            # cv2.imwrite(image_file_name,upperbody_image)
             break
+    return upperbody_image
 
 
 """
