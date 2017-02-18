@@ -40,6 +40,16 @@ preprocess_path = os.path.join(os.getcwd(),'preprocess')
 size = (150,150)
 k_thresh = 1 # early stopping threshold for kmeans originally at 1e-5, increased for speedup
 
+if not os.path.exists(ml_model_path):
+    os.mkdir(ml_model_path)
+
+if not os.path.exists(output_path):
+    os.mkdir(output_path)
+
+if not os.path.exists(preprocess_path):
+    os.mkdir(preprocess_path)
+
+
 """
 parse the command line arguments
 """
