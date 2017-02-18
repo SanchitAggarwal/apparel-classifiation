@@ -119,7 +119,7 @@ Performed different experiments for feature selection and classifier selection. 
 ```
 
 #### **Experiment 1:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
-For a quick evaluation purpose, We just used two classes U neck and V neck with 20, 20 images in each set.
+For a quick evaluation purpose and checking the pipeline, We just used two classes U neck and V neck with 20, 20 images in each set.
 
 *Results*:
 
