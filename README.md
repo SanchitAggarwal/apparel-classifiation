@@ -41,7 +41,7 @@ python ac_main.py -t training_dataset_folder -m model.pkl -b codebook_path -p pr
 ### Approach ###
 The problem is to classify apparel according to the curve of the neck. The very first thing is to represent the curve/shape of the neck using efficient feature representation. Since Histogram of Oriented Gradient ( HoG ) is known for shape representation. We can try formulating the problem using HoG image of the Neck region in each image.
 
-To segment the neck area from each image, we need to first determine the person upper body. This can be achieved by applying Upper body detector o locate humans in the natural scenes. Once we have region of interest segmented from each image we can represent them using Bag of Words over HoG features, which can then be fed to relevant classifiers.
+To segment the neck area from each image, we need to first determine the person upper body. This can be achieved by applying Upper body detector to locate humans in the natural scenes. Once we have region of interest segmented from each image we can represent them using Bag of Words over HoG features, which can then be fed to relevant classifiers.
 
 Since the robust classification of clothing in natural scene is a non-trivial and complex problem, we choose Support Vector Machine for classification purpose.
 
