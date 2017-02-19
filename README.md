@@ -95,15 +95,6 @@ def computeCodebook(dataframe):
     return codebook
 ```
 
-#### Improvements:####
-Can detect better upper body hypothesis by combining a well known Calvin upper body detector [here] (http://groups.inf.ed.ac.uk/calvin/calvin_upperbody_detector/) other than Haar based upper body detector.
-
-Further we can add features for B-Spline detection which are extensively used for curve matching.
-We can also use other features like SURF, Self Similarity (SSD), Local Binary Patterns (LBP) and use the combination of all to learn the initial codebook.
-We can try Random Forest with SVM for node splitting for further improvement in classification.
-
-We can also try Convolution Neural Networks or can use CNN features in the pipeline.
-
 
 ### Experiments ###
 Performed different experiments for feature selection and classifier selection. For all the experiments we divided the training data into training set and validation set with a validation set size of 0.3
@@ -172,6 +163,14 @@ It can be observed that the basic pipeline works well for two class problem to c
 
 The approach has a potential of doing better with higher resolution images and more sophisticated features and classifiers.
 
+#### Improvements:####
+Can detect better upper body hypothesis by combining a well known Calvin upper body detector [here] (http://groups.inf.ed.ac.uk/calvin/calvin_upperbody_detector/) other than Haar based upper body detector.
+
+Further we can add features for B-Spline detection which are extensively used for curve matching.
+We can also use other features like SURF, Self Similarity (SSD), Local Binary Patterns (LBP) and use the combination of all to learn the initial codebook.
+We can try Random Forest with SVM for node splitting for further improvement in classification.
+
+We can also try Convolution Neural Networks or can use CNN features in the pipeline.
 
 #### **References** ###
 [1) ECCV2012_ClothingAttributes.pdf] (http://chenlab.ece.cornell.edu/people/Andy/publications/ECCV2012_ClothingAttributes.pdf)
