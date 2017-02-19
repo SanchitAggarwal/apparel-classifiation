@@ -147,7 +147,6 @@ Finally, We run the pipeline on 5K images for all the classes. The model is perf
 |**Square collar**     |  0.00     |0.00    | 0.00     |340        |
 |**Round collar**      |  0.00     |0.00    | 0.00     |234        |
 |**Collar neck **      |  0.23     |1.00    | 0.37     |339        |
-
 |**avg / total**       |**0.05**   |**0.23**|**0.08 **  |**1503**   |
 
 #### **Conclusion** ###
