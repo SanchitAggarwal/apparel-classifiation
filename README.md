@@ -130,5 +130,25 @@ For a quick evaluation purpose and checking the pipeline, We just used two class
 |**avg / total**|**0.76**      |**0.75 **      |**0.75 **      |**12**|
 
 
+#### **Experiment 2:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
+Finally, We run the pipeline on 5K images for all the classes. The model is performing really bad. Hence We tried some improvements.
+
+*Results*:
+
+|                      |precision|  recall|  f1-score|  support|
+| -------------        |:-------:| ------:| --------:|--------:|
+|**Round Neck**        |  0.00     |0.00    | 0.00     |113        |
+|**U Neck**            |  0.00     |0.00    | 0.00     |24        |
+|**Boat neck**         |  0.00     |0.00    | 0.00     |75        |
+|**chinese collarneck**|  0.00     |0.00    | 0.00     |253        |
+|**Low cut neck**      |  0.00     |0.00    | 0.00     |78        |
+|**V Neck**            |  0.00       |0.00    | 0.00     |45        |
+|**Square Neck**       |  0.00     |0.00    | 0.00     |2        |
+|**Square collar**     |  0.00     |0.00    | 0.00     |340        |
+|**Round collar**      |  0.00     |0.00    | 0.00     |234        |
+|**Collar neck **      |  0.23     |1.00    | 0.37     |339        |
+
+|**avg / total**       |**0.05**   |**0.23**|**0.08 **  |**1503**   |
+
 #### **Conclusion** ###
 A very basic pipeline for Apparel Attribute classification in Natural scenes is presented here. The algorithm first determine relevant region for Neck type classification by utilizing state of the art upper body detector. A HoG representation of the region is then used to learn a Bag of Words over Support Vector Machines.
