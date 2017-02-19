@@ -170,4 +170,5 @@ A very basic pipeline for Apparel Attribute classification in Natural scenes is 
 
 #### **References** ###
 [1 ECCV2012_ClothingAttributes.pdf] (http://chenlab.ece.cornell.edu/people/Andy/publications/ECCV2012_ClothingAttributes.pdf)
+
 [2 Apparel Classification using CNNs] (http://cs231n.stanford.edu/reports2016/286_Report.pdf)
