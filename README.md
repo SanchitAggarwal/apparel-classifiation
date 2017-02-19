@@ -160,7 +160,7 @@ The results can be further improve by including other features and using differe
 |**Square Neck**       |  0.00     |0.00    | 0.00     |2        |
 |**Square collar**     |  0.00     |0.00    | 0.00     |340        |
 |**Round collar**      |  0.00     |0.00    | 0.00     |234        |
-|**Collar neck **      |  0.23     |1.00    | 0.37     |339        |
+|**Collar neck**      |  0.23     |1.00    | 0.37     |339        |
 |**avg / total**       |**0.05**   |**0.23**|**0.08**  |**1503**   |
 
 
