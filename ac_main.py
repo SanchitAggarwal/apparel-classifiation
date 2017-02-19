@@ -165,10 +165,10 @@ def preprocess_image(image, filename):
             cropped_upperbody_image = cv2.resize(cropped_upperbody_image, size)
             cropped_image_file_name = os.path.join(preprocess_path, 'cropped_'+ filename)
             cv2.imwrite(cropped_image_file_name,cropped_upperbody_image)
-            # upperbody_image = drawRectangle(image, body, 0, 0, 255)
-            # upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
-            # image_file_name = os.path.join(preprocess_path, filename)
-            # cv2.imwrite(image_file_name,upperbody_image)
+            upperbody_image = drawRectangle(image, body, 0, 0, 255)
+            upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
+            image_file_name = os.path.join(preprocess_path, filename)
+            cv2.imwrite(image_file_name,upperbody_image)
             break
     return cropped_upperbody_image
 
