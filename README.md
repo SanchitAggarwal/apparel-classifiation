@@ -3,7 +3,7 @@
 To identify the attribute of the Apparel in the Image.
 
 ### Datasets ###
-Attribute Annotated Dataset. Find the sample sheet [here](https://github.com/SanchitAggarwal/apparel-classifiation/tree/master/data).
+Attribute Annotated Dataset.
 
 
 ### Requirements ###
@@ -30,7 +30,7 @@ This will save a `model.pkl` file at the root folder.
 
 For testing the model, run:
 ``` sh
-python  ac_main.py -m model.pkl -p prediction_dataset_folder
+python  ac_main.py -m model.pkl -b codebook.pkl -p prediction_dataset_folder
 ```
 
 For simultaneously training and validation and testing, run:
@@ -102,6 +102,8 @@ Further we can add features for B-Spline detection which are extensively used fo
 We can also use other features like SURF, Self Similarity (SSD), Local Binary Patterns (LBP) and use the combination of all to learn the initial codebook.
 We can try Random Forest with SVM for node splitting for further improvement in classification.
 
+We can also try Convolution Neural Networks or can use CNN features in the pipeline.
+
 
 ### Experiments ###
 Performed different experiments for feature selection and classifier selection. For all the experiments we divided the training data into training set and validation set with a validation set size of 0.3
@@ -118,7 +120,7 @@ Performed different experiments for feature selection and classifier selection. 
 
 ```
 
-#### **Experiment 1:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
+#### **Experiment 1:** *Bag of Words on HoG Features + SVM - Binary Class - 30% Validation* ####
 For a quick evaluation purpose and checking the pipeline, We just used two classes U neck and V neck with 20, 20 images in each set.
 
 *Results*:
@@ -129,9 +131,21 @@ For a quick evaluation purpose and checking the pipeline, We just used two class
 |**V Neck**   |0.83     | 0.71         | 0.77      |7|
 |**avg / total**|**0.76**      |**0.75**      |**0.75**      |**12**|
 
+#### **Experiment 2:** *Bag of Words on HoG Features  + SVM - 30% Validation* ####
+We then run the pipeline on 4 classes. The model is performing really bad. Hence We tried some improvements.
 
-#### **Experiment 2:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
-Finally, We run the pipeline on 5K images for all the classes. The model is performing really bad. Hence We tried some improvements.
+|                      |precision|  recall|  f1-score|  support|
+| -------------        |:-------:| ------:| --------:|--------:|
+|**U Neck**            |  0.00     |0.00    | 0.00     |107        |
+|**V Neck**            |  0.00     |0.00    | 0.00     |44        |
+|**Boat neck**         |  0.0.48   |1.00    | 0.65     |344        |
+|**Square Neck**       |  0.23     |1.00    | 0.37     |216        |
+|**avg / total**       |**0.23**   |**0.48**|**0.32**  |**711**   |
+
+
+#### **Experiment 3:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
+Finally, We run the pipeline on 5K images for all the classes. The model is performing really bad.
+The results can be further improve by including other features and using different models such as Random Forests.
 
 *Results*:
 
@@ -142,12 +156,14 @@ Finally, We run the pipeline on 5K images for all the classes. The model is perf
 |**Boat neck**         |  0.00     |0.00    | 0.00     |75        |
 |**chinese collarneck**|  0.00     |0.00    | 0.00     |253        |
 |**Low cut neck**      |  0.00     |0.00    | 0.00     |78        |
-|**V Neck**            |  0.00       |0.00    | 0.00     |45        |
+|**V Neck**            |  0.00     |0.00    | 0.00     |45        |
 |**Square Neck**       |  0.00     |0.00    | 0.00     |2        |
 |**Square collar**     |  0.00     |0.00    | 0.00     |340        |
 |**Round collar**      |  0.00     |0.00    | 0.00     |234        |
 |**Collar neck **      |  0.23     |1.00    | 0.37     |339        |
 |**avg / total**       |**0.05**   |**0.23**|**0.08**  |**1503**   |
+
+
 
 #### **Conclusion** ###
 A very basic pipeline for Apparel Attribute classification in Natural scenes is presented here. The algorithm first determine relevant region for Neck type classification by utilizing state of the art upper body detector. A HoG representation of the region is then used to learn a Bag of Words over Support Vector Machines.
