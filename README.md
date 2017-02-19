@@ -127,7 +127,7 @@ For a quick evaluation purpose and checking the pipeline, We just used two class
 | ------------- |:-------:| ------:| --------:|--------:|
 |**U Neck**   |  0.67        |0.80        | 0.73         |5|
 |**V Neck**   |0.83     | 0.71         | 0.77      |7|
-|**avg / total**|**0.76**      |**0.75 **      |**0.75 **      |**12**|
+|**avg / total**|**0.76**      |**0.75**      |**0.75**      |**12**|
 
 
 #### **Experiment 2:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
