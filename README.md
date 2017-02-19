@@ -166,8 +166,8 @@ The approach has a potential of doing better with higher resolution images and m
 #### Improvements:####
 Can detect better upper body hypothesis by combining a well known Calvin upper body detector [here] (http://groups.inf.ed.ac.uk/calvin/calvin_upperbody_detector/) other than Haar based upper body detector.
 
-Further we can add features for B-Spline detection which are extensively used for curve matching.
-We can also use other features like SURF, Self Similarity (SSD), Local Binary Patterns (LBP) and use the combination of all to learn the initial codebook.
+Further we can add features for **B-Spline** detection which are extensively used for curve matching.
+We can also use other features like **SURF**, **Self Similarity (SSD)**, **Local Binary Patterns (LBP)** and use the combination of all to learn the initial codebook.
 We can try Random Forest with SVM for node splitting for further improvement in classification.
 
 We can also try Convolution Neural Networks or can use CNN features in the pipeline.
