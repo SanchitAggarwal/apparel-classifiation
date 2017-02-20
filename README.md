@@ -73,21 +73,21 @@ To remove the false positives of Upper Body detection we find a frontal face ins
 Function to preprocess image detecting upperbody parts
 '''
 def preprocessImage(image, filename):
-    cropped_upperbody_image = np.empty((0))
+    face_detected_upperbody_image = np.empty((0))
     upperbody = getBodyPart(image,upperbody_cascade_path, (30,30))
     for body in upperbody:
         cropped_upperbody_image = cropImage(image, body)
         face = getBodyPart(cropped_upperbody_image, frontalface_cascade_path, (30,30))
         if len(face)>0:
-            cropped_upperbody_image = cv2.resize(cropped_upperbody_image, size)
+            face_detected_upperbody_image = cv2.resize(cropped_upperbody_image, size)
             cropped_image_file_name = os.path.join(preprocess_path, 'cropped_'+ filename)
-            cv2.imwrite(cropped_image_file_name,cropped_upperbody_image)
+            cv2.imwrite(cropped_image_file_name,face_detected_upperbody_image)
             upperbody_image = drawRectangle(image, body, 0, 0, 255)
             upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
             image_file_name = os.path.join(preprocess_path, filename)
             cv2.imwrite(image_file_name,upperbody_image)
             break
-    return cropped_upperbody_image
+    return face_detected_upperbody_image
 ```
 
 #### Feature Extraction and Bag of Words Representation: ####
