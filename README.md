@@ -171,7 +171,7 @@ The results can be further improve by including other features and using differe
 
 
 #### **Conclusion** ###
-- A very basic pipeline for Apparel Attribute classification in Natural scenes is presented here. The algorithm first determine relevant region for Neck type classification by utilizing state of the art upper body detector. A HoG representation of the region is then used to learn a Bag of Words with a layer of Support Vector Machines for final classification
+- A very basic pipeline for Apparel Attribute classification in Natural scenes is presented here. The algorithm first determine relevant region for Neck type classification by utilizing state of the art upper body detector. A HoG representation of the region is then used to learn a Bag of Words with a layer of Support Vector Machines for final classification.
 
 - It can be observed that the basic pipeline works well for two class problem to classify U Neck and V Neck but it drastically fails for a more complex attribute classification.
 
