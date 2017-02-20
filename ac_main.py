@@ -135,24 +135,12 @@ def getSIFT(image):
 Function to extract HoG descriptors
 '''
 def getHoG(image):
-    # winSize = (64,64)
-    # blockSize = (16,16)
-    # blockStride = (8,8)
-    # cellSize = (8,8)
-    # nbins = 9
-    # derivAperture = 1
-    # winSigma = 4.
-    # histogramNormType = 0
-    # L2HysThreshold = 2.0000000000000001e-01
-    # gammaCorrection = 0
-    # nlevels = 64
-    # hog = cv2.HOGDescriptor(winSize,blockSize,blockStride,cellSize,nbins,derivAperture,winSigma,histogramNormType,L2HysThreshold,gammaCorrection,nlevels)
-    # winStride = (8,8)
-    # padding = (8,8)
-    # locations = ((10,20),)
-    # hist = hog.compute(image,winStride,padding,locations)
-    fd, hog_image = hog(image, orientations=9, pixels_per_cell=(2, 2),cells_per_block=(4, 4), visualise=True)
-    return fd, hog_image
+    # Opencv HoG Descriptor
+    # hog = cv2.HOGDescriptor(winSize = (64,64),blockSize = (16,16),blockStride = (8,8),cellSize = (8,8),nbins = 9,derivAperture = 1,winSigma = 4.,histogramNormType = 0, L2HysThreshold = 2.0000000000000001e-01,gammaCorrection = 0,nlevels = 64)
+    # hist = hog.compute(image,winStride = (8,8),padding = (8,8),locations = ((10,20),))
+    # skimage HoG
+    hog_hist, hog_image = hog(image, orientations=9, pixels_per_cell=(2, 2),cells_per_block=(4, 4), visualise=True)
+    return hog_hist, hog_image
 
 '''
 Function to convert image into gray image

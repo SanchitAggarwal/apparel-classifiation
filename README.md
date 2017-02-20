@@ -38,12 +38,16 @@ For simultaneously training and validation and testing, run:
 python ac_main.py -t training_dataset_folder -m model.pkl -b codebook_path -p prediction_dataset_folder -v 1 -s 0.3
 ```
 
-For Dataset, have a folder with following structure:
+For Training Dataset, have a folder with following structure:
 - training_dataset_folder
  - Class_1
  - Class_2
  - ...
  - Class N
+
+For Prediction Dataset, have a folder with above structure or:
+- prediction_dataset_folder
+ - Unknown
 
 ### Approach ###
 The problem is to classify apparel according to the curve of the neck. The very first thing is to represent the curve/shape of the neck using efficient feature representation. Since Histogram of Oriented Gradient ( HoG ) is known for shape representation. We can try formulating the problem using HoG image of the Neck region in each image.
@@ -87,7 +91,7 @@ def preprocessImage(image, filename):
 ```
 
 #### Feature Extraction and Bag of Words Representation: ####
-Features: We use HoG of the detected region.
+Features: We use HoG of the detected region. Cell Size: 2 x 2, Block Size: 4 x 4
 
 Coding: A codebook is learned by K-Means, further all features are vector quantized using this codebook.
 
