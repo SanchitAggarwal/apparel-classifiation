@@ -68,7 +68,7 @@ To remove the false positives of Upper Body detection we find a frontal face ins
 '''
 Function to preprocess image detecting upperbody parts
 '''
-def preprocess_image(image, filename):
+def preprocessImage(image, filename):
     cropped_upperbody_image = np.empty((0))
     upperbody = getBodyPart(image,upperbody_cascade_path, (30,30))
     for body in upperbody:

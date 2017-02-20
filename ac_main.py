@@ -75,8 +75,8 @@ def parseArguments():
         ap.error('-- either of one (training_dataset_folder/model_path) is required')
     if args["model_path"] is not None and args["codebook_path"] is None:
         ap.error('-- both model_path and codebook_path are required')
-    if args["model_path"] is not None and args["test_dataset_folder"] is None:
-        ap.error('-- both model_path and test_dataset_folder are required')
+    if args["model_path"] is not None and args["prediction_dataset_folder"] is None:
+        ap.error('-- both model_path and prediction_dataset_folder are required')
     return args
 
 """
@@ -155,9 +155,16 @@ def getHoG(image):
     return hist.flatten()
 
 '''
+Function to convert image into gray image
+'''
+def getGray(image):
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return gray_image
+
+'''
 Function to preprocess image detecting upperbody parts
 '''
-def preprocess_image(image, filename):
+def preprocessImage(image, filename):
     cropped_upperbody_image = np.empty((0))
     upperbody = getBodyPart(image,upperbody_cascade_path, (30,30))
     for body in upperbody:
@@ -171,6 +178,7 @@ def preprocess_image(image, filename):
             upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
             image_file_name = os.path.join(preprocess_path, filename)
             cv2.imwrite(image_file_name,upperbody_image)
+            cropped_upperbody_image = getGray(cropped_upperbody_image)
             break
     return cropped_upperbody_image
 
@@ -182,7 +190,7 @@ def extractFeatures(imagefiles,labels):
     feature_label_list = []
     for index in range(len(imagefiles)):
         print "%s calculating features for %s" %(index, imagefiles[index])
-        training_image = preprocess_image(cv2.imread(imagefiles[index]),imagefiles[index].split('/')[-1])
+        training_image = preprocessImage(cv2.imread(imagefiles[index]),imagefiles[index].split('/')[-1])
         if training_image.size:
             feature_label_list.append([imagefiles[index].split('/')[-1],labels[index], getHoG(training_image),[]])
 
@@ -291,7 +299,9 @@ def prediction(data_set, model, codebook, target_labels):
     data_set["predicted"] = predictModel(data_set,model)
     print data_set["predicted"]
 
+    print "--------Classification Report------------"
     print(classification_report(data_set["labels"], data_set["predicted"], target_names = target_labels))
+    print "--------Confusion Matrix------------"
     print(confusion_matrix(data_set["labels"], data_set["predicted"], labels = target_labels))
 
      # Save results to output object
@@ -401,8 +411,8 @@ if __name__ == '__main__':
 
         training(args["training_dataset_folder"],split)
 
-    if args["model_path"] is not None and args["codebook_path"] is not None and args["test_dataset_folder"] is not None:
+    if args["model_path"] is not None and args["codebook_path"] is not None and args["prediction_dataset_folder"] is not None:
         model = readModel(args["model_path"])
         codebook = readModel(args["codebook_path"])
-        query_image_folder = args["test_dataset_folder"]
-        testing(test_dataset_folder, model, codebook)
+        prediction_dataset_folder = args["prediction_dataset_folder"]
+        testing(prediction_dataset_folder, model, codebook)
