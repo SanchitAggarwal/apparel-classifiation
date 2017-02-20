@@ -16,6 +16,7 @@ from imutils.object_detection import non_max_suppression
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from numpy import array, zeros, resize, sqrt, histogram, hstack, vstack, savetxt, zeros_like, concatenate
 import time
@@ -39,7 +40,7 @@ output_path = os.path.join(os.getcwd(),'output/')
 preprocess_path = os.path.join(os.getcwd(),'preprocess')
 size = (150,150)
 k_thresh = 1 # early stopping threshold for kmeans originally at 1e-5, increased for speedup
-
+nclusters = 1000
 if not os.path.exists(ml_model_path):
     os.mkdir(ml_model_path)
 
@@ -195,7 +196,7 @@ def extractFeatures(imagefiles,labels):
 def computeCodebook(dataframe):
     total_features = len(dataframe)
     print "total keypoints", total_features
-    nclusters = int(sqrt(total_features))
+    nclusters = int(sqrt(nclusters))
     print "total clusters", nclusters
     features = array(dataframe['features'])
     features = np.concatenate(features).astype(None)
@@ -290,6 +291,7 @@ def prediction(data_set, model, codebook, target_labels):
     print data_set["predicted"]
 
     print(classification_report(data_set["labels"], data_set["predicted"], target_names = target_labels))
+    print(confusion_matrix(data_set["labels"], data_set["predicted"], labels = target_labels))
 
      # Save results to output object
     print "----Saving Results----"
