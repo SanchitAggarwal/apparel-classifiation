@@ -40,7 +40,7 @@ upperbody_cascade_path = './haarcascades/haarcascade_mcs_upperbody.xml'
 ml_model_path = os.path.join(os.getcwd(),'ml_model/')
 output_path = os.path.join(os.getcwd(),'output/')
 preprocess_path = os.path.join(os.getcwd(),'preprocess')
-size = (400,400)
+size = (150,150)
 k_thresh = 1 # early stopping threshold for kmeans originally at 1e-5, increased for speedup
 no_of_clusters = 1000
 if not os.path.exists(ml_model_path):
@@ -188,6 +188,8 @@ def extractFeatures(imagefiles,labels):
             hog_image_file_name = os.path.join(preprocess_path, 'hog_'+ imagefiles[index].split('/')[-1])
             cv2.imwrite(hog_image_file_name,hog_image)
             feature_label_list.append([imagefiles[index].split('/')[-1],labels[index], hog_hist,[]])
+        else:
+            print "----skiping image-----"
 
     # get the data frame for training data
     print "----Creating Data Frame----"
@@ -202,9 +204,11 @@ def computeCodebook(dataframe):
     print "total keypoints", total_features
     nclusters = int(sqrt(no_of_clusters))
     print "total clusters", nclusters
-    features = array(dataframe['features'])
-    features = np.concatenate(features).astype(None)
+    features = dataframe['features'].tolist()
     print features
+    features = np.vstack(features)
+    print features
+    print features.shape
     codebook, distortion = vq.kmeans(features,nclusters,thresh=k_thresh)
     return codebook
 
@@ -212,11 +216,11 @@ def computeCodebook(dataframe):
 # Function to compute histogram
 """
 def computeHistogram(dataframe,codebook):
-    for index, row in dataframe.iterrows():
-        feature = row["features"]
-        code, dist = vq.vq(feature, codebook)
-        word_histogram, bin_edges = histogram(code, bins=range(codebook.shape[0] + 1), normed=True)
-        dataframe.loc[index,"histograms"] = word_histogram
+    features = dataframe['features'].tolist()
+    features = np.vstack(features)
+    code, distance = vq.vq(features, codebook)
+    word_histograms , bin_edges = histogram(code, bins=range(codebook.shape[0] + 1), normed=True)
+    dataframe["histograms"] = word_histograms
     return dataframe
 
 """
@@ -326,11 +330,11 @@ def training(training_image_folder, split):
     if split > 0:
         # split into training and validation set
         print "splitting data into training and validation set"
-        training_set, validation_set = train_test_split(feature_dataframe, test_size = split)
+        training_set, validation_set = train_test_split(feature_dataframe.copy(), test_size = split)
         print training_set.shape
         print validation_set.shape
     else:
-        training_set =  feature_dataframe
+        training_set =  feature_dataframe.copy()
 
 
     # ################## Coding and Pooling #################################
