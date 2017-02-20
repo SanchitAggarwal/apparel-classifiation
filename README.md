@@ -39,12 +39,12 @@ python ac_main.py -t training_dataset_folder -m model.pkl -b codebook_path -p pr
 ```
 
 For Dataset, have a folder with following structure:
-- training_set
+- training_dataset_folder
  - Class_1
  - Class_2
  - ...
  - Class N
- 
+
 ### Approach ###
 The problem is to classify apparel according to the curve of the neck. The very first thing is to represent the curve/shape of the neck using efficient feature representation. Since Histogram of Oriented Gradient ( HoG ) is known for shape representation. We can try formulating the problem using HoG image of the Neck region in each image.
 
