@@ -209,6 +209,7 @@ def computeCodebook(dataframe):
     features = np.vstack(features)
     print features
     print len(features)
+    features = whiten(features)
     codebook, distortion = vq.kmeans(features,nclusters,thresh=k_thresh)
     return codebook
 
@@ -218,12 +219,19 @@ def computeCodebook(dataframe):
 def computeHistogram(dataframe,codebook):
     features = dataframe['features'].tolist()
     features = np.vstack(features)
-    code, distance = vq.vq(features, codebook)
-    word_histograms , bin_edges = histogram(code, bins=range(codebook.shape[0] + 1), normed=True)
+    word_histograms = []
+    for feature in features:
+        print feature
+        print feature.shape
+        print type(feature)
+        print codebook.shape
+        feature =  np.reshape(feature, (1, codebook.shape[1]))
+        code, distance = vq.vq(feature, codebook)
+        word_histogram , bin_edges = histogram(code, bins=range(codebook.shape[0] + 1), normed=True)
+        word_histograms.append(word_histogram)
     print word_histograms
-    return word_histograms
-    # dataframe["histograms"] = word_histograms
-    # return dataframe
+    dataframe["histograms"] = word_histograms
+    return dataframe
 
 """
 # Function to train the model for given pipeline
