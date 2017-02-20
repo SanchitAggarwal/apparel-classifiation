@@ -104,11 +104,14 @@ Pooling: Finally, the quantized vectors are then spatially pooled with spatial p
 def computeCodebook(dataframe):
     total_features = len(dataframe)
     print "total keypoints", total_features
-    nclusters = int(sqrt(nclusters))
+    nclusters = int(sqrt(no_of_clusters))
     print "total clusters", nclusters
-    features = array(dataframe['features'])
-    features = np.concatenate(features).astype(None)
+    features = dataframe['features'].tolist()
+    # print features
+    features = np.vstack(features)
     print features
+    print len(features)
+    features = whiten(features)
     codebook, distortion = vq.kmeans(features,nclusters,thresh=k_thresh)
     return codebook
 ```
@@ -118,14 +121,15 @@ def computeCodebook(dataframe):
 Performed different experiments for feature selection and classifier selection. For all the experiments we divided the training data into training set and validation set with a validation set size of 0.3
 
 ``` python
-    if split > 0:
-          # split into training and validation set
-          print "splitting data into training and validation set"
-          training_set, validation_set = train_test_split(feature_dataframe, test_size = split)
-          print training_set.shape
-          print validation_set.shape
-      else:
-          training_set =  feature_dataframe
+if split > 0:
+      # split into training and validation set
+      print "splitting data into training and validation set"
+      training_set, validation_set = train_test_split(feature_dataframe.copy(), test_size = split)
+      print training_set.shape
+      print validation_set.shape
+  else:
+      training_set =  feature_dataframe.copy()
+
 
 ```
 
