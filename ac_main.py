@@ -8,7 +8,8 @@ import urllib
 import pandas as pd
 import cv2
 import argparse
-import skimage
+from skimage.feature import hog
+from skimage import data, color, exposure
 import numpy as np
 import scipy.cluster.vq as vq
 from scipy.cluster.vq import whiten
@@ -39,7 +40,7 @@ upperbody_cascade_path = './haarcascades/haarcascade_mcs_upperbody.xml'
 ml_model_path = os.path.join(os.getcwd(),'ml_model/')
 output_path = os.path.join(os.getcwd(),'output/')
 preprocess_path = os.path.join(os.getcwd(),'preprocess')
-size = (150,150)
+size = (400,400)
 k_thresh = 1 # early stopping threshold for kmeans originally at 1e-5, increased for speedup
 no_of_clusters = 1000
 if not os.path.exists(ml_model_path):
@@ -134,25 +135,24 @@ def getSIFT(image):
 Function to extract HoG descriptors
 '''
 def getHoG(image):
-    winSize = (64,64)
-    blockSize = (16,16)
-    blockStride = (8,8)
-    cellSize = (8,8)
-    nbins = 9
-    derivAperture = 1
-    winSigma = 4.
-    histogramNormType = 0
-    L2HysThreshold = 2.0000000000000001e-01
-    gammaCorrection = 0
-    nlevels = 64
-    hog = cv2.HOGDescriptor(winSize,blockSize,blockStride,cellSize,nbins,derivAperture,winSigma,histogramNormType,L2HysThreshold,gammaCorrection,nlevels)
-    winStride = (8,8)
-    padding = (8,8)
-    locations = ((10,20),)
-    hist = hog.compute(image,winStride,padding,locations)
-    # skimage.feature.hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3), block_norm='L1', visualise=False, transform_sqrt=False, feature_vector=True, normalise=None)
-    # print len(hist.flatten())
-    return hist.flatten()
+    # winSize = (64,64)
+    # blockSize = (16,16)
+    # blockStride = (8,8)
+    # cellSize = (8,8)
+    # nbins = 9
+    # derivAperture = 1
+    # winSigma = 4.
+    # histogramNormType = 0
+    # L2HysThreshold = 2.0000000000000001e-01
+    # gammaCorrection = 0
+    # nlevels = 64
+    # hog = cv2.HOGDescriptor(winSize,blockSize,blockStride,cellSize,nbins,derivAperture,winSigma,histogramNormType,L2HysThreshold,gammaCorrection,nlevels)
+    # winStride = (8,8)
+    # padding = (8,8)
+    # locations = ((10,20),)
+    # hist = hog.compute(image,winStride,padding,locations)
+    fd, hog_image = hog(image, orientations=9, pixels_per_cell=(2, 2),cells_per_block=(4, 4), visualise=True)
+    return fd, hog_image
 
 '''
 Function to convert image into gray image
@@ -178,7 +178,6 @@ def preprocessImage(image, filename):
             upperbody_image = putText(upperbody_image, "Upperbody", body[0], body[1],0,255,0)
             image_file_name = os.path.join(preprocess_path, filename)
             cv2.imwrite(image_file_name,upperbody_image)
-            cropped_upperbody_image = getGray(cropped_upperbody_image)
             break
     return cropped_upperbody_image
 
@@ -190,9 +189,17 @@ def extractFeatures(imagefiles,labels):
     feature_label_list = []
     for index in range(len(imagefiles)):
         print "%s calculating features for %s" %(index, imagefiles[index])
-        training_image = preprocessImage(cv2.imread(imagefiles[index]),imagefiles[index].split('/')[-1])
+        training_image = cv2.imread(imagefiles[index])
+        training_image = preprocessImage(training_image,imagefiles[index].split('/')[-1])
         if training_image.size:
-            feature_label_list.append([imagefiles[index].split('/')[-1],labels[index], getHoG(training_image),[]])
+            print training_image.shape
+            training_image = getGray(training_image)
+            hog_hist, hog_image = getHoG(training_image)
+            print hog_hist.shape
+            print hog_image.shape
+            hog_image_file_name = os.path.join(preprocess_path, 'hog_'+ imagefiles[index].split('/')[-1])
+            cv2.imwrite(hog_image_file_name,hog_image)
+            feature_label_list.append([imagefiles[index].split('/')[-1],labels[index], hog_hist,[]])
 
     # get the data frame for training data
     print "----Creating Data Frame----"
