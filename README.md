@@ -197,3 +197,5 @@ We can also use other features like **SURF**, **Self Similarity (SSD)**, **Local
 [1) ECCV2012_ClothingAttributes.pdf] (http://chenlab.ece.cornell.edu/people/Andy/publications/ECCV2012_ClothingAttributes.pdf)
 
 [2) Apparel Classification using CNNs] (http://cs231n.stanford.edu/reports2016/286_Report.pdf)
+
+[3) Style Finder: Fine-Grained Clothing Style Recognition and Retrieval] (http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.370.6283&rep=rep1&type=pdf)
