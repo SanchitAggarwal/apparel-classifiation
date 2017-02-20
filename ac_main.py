@@ -14,6 +14,7 @@ import scipy.cluster.vq as vq
 from scipy.cluster.vq import whiten
 from imutils.object_detection import non_max_suppression
 from sklearn.linear_model import SGDClassifier
+from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -344,8 +345,13 @@ def training(training_image_folder, split):
     print training_set.head(5)
 
     # define the pipeline
+    # pipeline = Pipeline([
+    # ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, n_iter=5, random_state=42))])
     pipeline = Pipeline([
-    ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, n_iter=5, random_state=42))])
+    ('clf', SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+    decision_function_shape=None, degree=3, gamma='auto', kernel='rbf',
+    max_iter=-1, probability=False, random_state=None, shrinking=True,
+    tol=0.001, verbose=False))])
 
     # get training model
     model = trainModel(training_set, pipeline)
