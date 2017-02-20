@@ -42,7 +42,7 @@ output_path = os.path.join(os.getcwd(),'output/')
 preprocess_path = os.path.join(os.getcwd(),'preprocess')
 size = (150,150)
 k_thresh = 1 # early stopping threshold for kmeans originally at 1e-5, increased for speedup
-no_of_clusters = 1000
+no_of_clusters = 1000000
 if not os.path.exists(ml_model_path):
     os.mkdir(ml_model_path)
 
@@ -225,7 +225,8 @@ def computeHistogram(dataframe,codebook):
         print feature.shape
         print type(feature)
         print codebook.shape
-        feature =  np.reshape(feature, (1, codebook.shape[1]))
+        feature = np.reshape(feature, (1, codebook.shape[1]))
+        feature = whiten(features)
         code, distance = vq.vq(feature, codebook)
         word_histogram , bin_edges = histogram(code, bins=range(codebook.shape[0] + 1), normed=True)
         word_histograms.append(word_histogram)
