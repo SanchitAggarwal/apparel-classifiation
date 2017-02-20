@@ -45,6 +45,13 @@ To segment the neck area from each image, we need to first determine the person 
 
 Since the robust classification of clothing in natural scene is a non-trivial and complex problem, we choose Support Vector Machine for classification purpose.
 
+The code is divided into five major blocks.
+- Dataset formation/downloading
+- Pre-processing
+- Feature Extraction
+- Model Learning and validation
+- Testing and Report Generation
+
 #### Pre-processing ####
 Performed pre-processing of images to extract upper body parts from the images. Non-maxima Suppression is used to get the best hypothesis for the upper body part. The bounding region is then used to extract features like HoG, SURF.
 
@@ -168,6 +175,9 @@ Can detect better upper body hypothesis by combining a well known Calvin upper b
 
 Further we can add features for **B-Spline** detection which are extensively used for curve matching.
 We can also use other features like **SURF**, **Self Similarity (SSD)**, **Local Binary Patterns (LBP)** and use the combination of all to learn the initial codebook.
+
+To further enhance we can also find the percentage of skin Color (Histogram of colors) for different neck types as added features and do experiments over different moments of color tones.
+
 We can try Random Forest with SVM for node splitting for further improvement in classification.
 
 We can also try Convolution Neural Networks or can use CNN features in the pipeline.
