@@ -157,7 +157,7 @@ We then run the pipeline on 4 classes. The model is performing really bad. Hence
 
 
 #### **Experiment 3:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
-Finally, We run the pipeline on 5K images for all the classes. The model is performing really bad.
+Finally, We run the pipeline on 5K images for all the classes. The model is performing really bad. It has overfitted the Collar Neck Attribute. One way to improve this is to group the similar curve collars and then learn a hierarchical classifiers for same group collars with features like B-splines.
 The results can be further improve by including other features and using different models such as Random Forests.
 
 *Results*:
