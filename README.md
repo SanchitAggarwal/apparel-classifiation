@@ -164,23 +164,23 @@ The results can be further improve by including other features and using differe
 
 
 #### **Conclusion** ###
-A very basic pipeline for Apparel Attribute classification in Natural scenes is presented here. The algorithm first determine relevant region for Neck type classification by utilizing state of the art upper body detector. A HoG representation of the region is then used to learn a Bag of Words over Support Vector Machines.
+- A very basic pipeline for Apparel Attribute classification in Natural scenes is presented here. The algorithm first determine relevant region for Neck type classification by utilizing state of the art upper body detector. A HoG representation of the region is then used to learn a Bag of Words over Support Vector Machines.
 
-It can be observed that the basic pipeline works well for two class problem to classify U Neck and V Neck but it drastically fails for a more complex attribute classification.
+- It can be observed that the basic pipeline works well for two class problem to classify U Neck and V Neck but it drastically fails for a more complex attribute classification.
 
-The approach has a potential of doing better with higher resolution images and more sophisticated features and classifiers.
+- The approach has a potential of doing better with higher resolution images and more sophisticated features and classifiers.
 
 #### Improvements:####
-Can detect better upper body hypothesis by combining a well known Calvin upper body detector [here] (http://groups.inf.ed.ac.uk/calvin/calvin_upperbody_detector/) other than Haar based upper body detector.
+- Can detect better upper body hypothesis by combining a well known Calvin upper body detector [here] (http://groups.inf.ed.ac.uk/calvin/calvin_upperbody_detector/) other than Haar based upper body detector.
 
-Further we can add features for **B-Spline** detection which are extensively used for curve matching.
+- Further we can add features for **B-Spline** detection which are extensively used for curve matching.
 We can also use other features like **SURF**, **Self Similarity (SSD)**, **Local Binary Patterns (LBP)** and use the combination of all to learn the initial codebook.
 
-To further enhance we can also find the percentage of skin Color (Histogram of colors) for different neck types as added features and do experiments over different moments of color tones.
+- To further enhance we can also find the percentage of skin Color (Histogram of colors) for different neck types as added features and do experiments over different moments of color tones.
 
-We can try Random Forest with SVM for node splitting for further improvement in classification.
+- We can try Random Forest with SVM for node splitting for further improvement in classification.
 
-We can also try Convolution Neural Networks or can use CNN features in the pipeline.
+- We can also try Convolution Neural Networks or can use CNN features in the pipeline.
 
 #### **References** ###
 [1) ECCV2012_ClothingAttributes.pdf] (http://chenlab.ece.cornell.edu/people/Andy/publications/ECCV2012_ClothingAttributes.pdf)
