@@ -129,7 +129,7 @@ We then run the pipeline on 4 classes. The model is performing really bad. Hence
 | -------------        |:-------:| ------:| --------:|--------:|
 |**U Neck**            |  0.00     |0.00    | 0.00     |107        |
 |**V Neck**            |  0.00     |0.00    | 0.00     |44        |
-|**Boat neck**         |  0.0.48   |1.00    | 0.65     |344        |
+|**Boat neck**         |  0.48     |1.00    | 0.65     |344        |
 |**Square Neck**       |  0.23     |1.00    | 0.37     |216        |
 |**avg / total**       |**0.23**   |**0.48**|**0.32**  |**711**   |
 
