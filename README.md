@@ -140,11 +140,24 @@ For a quick evaluation purpose and checking the pipeline, We just used two class
 
 |               |precision|  recall|  f1-score|  support|
 | ------------- |:-------:| ------:| --------:|--------:|
-|**U Neck**   |  0.67        |0.80        | 0.73         |5|
-|**V Neck**   |0.83     | 0.71         | 0.77      |7|
-|**avg / total**|**0.76**      |**0.75**      |**0.75**      |**12**|
+|**U Neck**   |  1.00         |0.33        | 0.50        |3|
+|**V Neck**   |0.71      | 1.00         | 0.83      |5|
+|**avg / total**|**0.82**      |**0.75**      |**0.71**      |**8**|
 
-#### **Experiment 2:** *Bag of Words on HoG Features  + SVM - 30% Validation* ####
+
+#### **Experiment 2:** *HoG Features + SVM - Binary Class - 30% Validation* ####
+Then we evaluated on the whole dataset containing 2K images of U Neck and V Neck.
+
+*Results*:
+
+|               |precision|  recall|  f1-score|  support|
+| ------------- |:-------:| ------:| --------:|--------:|
+|**U Neck**   |  0.67        |0.97        | 0.80         |302|
+|**V Neck**   |0.85     | 0.24        |0.38      |188|
+|**avg / total**|**0.74**      |**0.64**      |**0.75**      |**490**|
+
+
+#### **Experiment 3:** *Bag of Words on HoG Features  + SVM - 30% Validation* ####
 We then run the pipeline on 4 classes with  Bag of words on Hog Features. The model is performing really bad. Hence We tried some improvements.
 
 |                      |precision|  recall|  f1-score|  support|
@@ -156,7 +169,7 @@ We then run the pipeline on 4 classes with  Bag of words on Hog Features. The mo
 |**avg / total**       |**0.23**   |**0.48**|**0.32**  |**711**   |
 
 
-#### **Experiment 3:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
+#### **Experiment 4:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
 Finally, We run the pipeline on 5K images for all the classes. The model is performing really bad. It has overfitted the Collar Neck Attribute. One way to improve this is to group the similar curve collars and then learn a hierarchical classifiers for same group collars with features like B-splines.
 The results can be further improve by including other features and using different models such as Random Forests.
 
