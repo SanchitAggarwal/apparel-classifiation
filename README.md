@@ -134,7 +134,7 @@ if split > 0:
 ```
 
 #### **Experiment 1:** *HoG Features + SVM - Binary Class - 30% Validation* ####
-For a quick evaluation purpose and checking the pipeline, We just used two classes U neck and V neck with 20, 20 images in each set.
+For a quick evaluation purpose and checking the pipeline, We just used two classes U neck and V neck with 20, 20 images in each set. HoG features are extracted and directly fed to SVM classifier.
 
 *Results*:
 
@@ -146,7 +146,7 @@ For a quick evaluation purpose and checking the pipeline, We just used two class
 
 
 #### **Experiment 2:** *HoG Features + SVM - Binary Class - 30% Validation* ####
-Then we evaluated on the whole dataset containing 2K images of U Neck and V Neck.
+Then we evaluated on the whole dataset containing 2K images of U Neck and V Neck. HoG features are extracted and directly fed to SVM classifier.
 
 *Results*:
 
@@ -158,7 +158,7 @@ Then we evaluated on the whole dataset containing 2K images of U Neck and V Neck
 
 
 #### **Experiment 3:** *Bag of Words on HoG Features  + SVM - 30% Validation* ####
-We then run the pipeline on 4 classes with  Bag of words on Hog Features. The model is performing really bad. Hence We tried some improvements.
+To further improve the pipeline, we experimented with Bag of Words over Hog Features. We run the pipeline on 4 classes. We used 256 cluster for quick computation, The model is performing really bad and requires cluster tuning as BoW model is sensitive to number of clusters.
 
 |                      |precision|  recall|  f1-score|  support|
 | -------------        |:-------:| ------:| --------:|--------:|
@@ -170,7 +170,7 @@ We then run the pipeline on 4 classes with  Bag of words on Hog Features. The mo
 
 
 #### **Experiment 4:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
-Finally, We run the pipeline on 5K images for all the classes. The model is performing really bad. It has overfitted the Collar Neck Attribute. One way to improve this is to group the similar curve collars and then learn a hierarchical classifiers for same group collars with features like B-splines.
+Finally, We run the pipeline on 5K images for all the classes. The model is performing really bad. It has overfitted the Collar Neck Attribute. One way to improve this is to group the similar curve collars and then learn a hierarchical classifiers for same group collars with features like B-splines. In addition Parameter Tuning at different sections of the pipeline such as HoG extraction, BoW dictionary Learning, SVM training can further help improving the performance.
 The results can be further improve by including other features and using different models such as Random Forests.
 
 *Results*:
