@@ -157,7 +157,27 @@ Then we evaluated on the whole dataset containing 2K images of U Neck and V Neck
 |**avg / total**|**0.74**      |**0.64**      |**0.75**      |**490**|
 
 
-#### **Experiment 3:** *Bag of Words on HoG Features  + SVM - 30% Validation* ####
+#### **Experiment 3:** *HoG Features + SVM - Binary Class - 30% Validation* ####
+Then we evaluated on the whole dataset containing 5K images with all attribute classes. HoG features are extracted and directly fed to SVM classifier.
+
+*Results*:
+
+|                      |precision|  recall|  f1-score|  support|
+| -------------        |:-------:| ------:| --------:|--------:|
+|**Round Neck**        |  0.37     |0.23    | 0.28     |100        |
+|**U Neck**            |  0.00     |0.00    | 0.00     |17        |
+|**Boat neck**         |  0.26     |0.15    | 0.19     |82        |
+|**chinese collarneck**|  0.41     |0.28   | 0.33    |231        |
+|**Low cut neck**      |  0.40     |0.27    | 0.32     |64        |
+|**V Neck**            |  0.11     |0.02    | 0.04     |47        |
+|**Square Neck**       |  0.00     |0.00     | 0.00     |1        |
+|**Square collar**     |   0.40     |0.64    | 0.49     |312        |
+|**Round collar**      |  0.24     |0.40    | 0.31     |178        |
+|**Collar neck**      |  0.71     |0.49    | 0.58     |297        |
+|**avg / total**       |**0.42**   |**0.40**|**0.39**  |**1329**   |
+
+
+#### **Experiment 4:** *Bag of Words on HoG Features  + SVM - 30% Validation* ####
 To further improve the pipeline, we experimented with Bag of Words over Hog Features. We run the pipeline on 4 classes. We used 256 cluster for quick computation, The model is performing really bad and requires cluster tuning as BoW model is sensitive to number of clusters.
 
 |                      |precision|  recall|  f1-score|  support|
@@ -169,7 +189,7 @@ To further improve the pipeline, we experimented with Bag of Words over Hog Feat
 |**avg / total**       |**0.23**   |**0.48**|**0.32**  |**711**   |
 
 
-#### **Experiment 4:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
+#### **Experiment 5:** *Bag of Words on HoG Features + SVM - 30% Validation* ####
 Finally, We run the pipeline on 5K images for all the classes. The model is performing really bad. It has overfitted the Collar Neck Attribute. One way to improve this is to group the similar curve collars and then learn a hierarchical classifiers for same group collars with features like B-splines. In addition Parameter Tuning at different sections of the pipeline such as HoG extraction, BoW dictionary Learning, SVM training can further help improving the performance.
 The results can be further improve by including other features and using different models such as Random Forests.
 
