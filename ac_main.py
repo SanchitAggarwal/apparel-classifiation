@@ -42,7 +42,7 @@ output_path = os.path.join(os.getcwd(),'output/')
 preprocess_path = os.path.join(os.getcwd(),'preprocess')
 size = (150,150)
 k_thresh = 1 # early stopping threshold for kmeans originally at 1e-5, increased for speedup
-no_of_clusters = 1000000
+no_of_clusters = 256
 if not os.path.exists(ml_model_path):
     os.mkdir(ml_model_path)
 
@@ -202,7 +202,8 @@ def extractFeatures(imagefiles,labels):
 def computeCodebook(dataframe):
     total_features = len(dataframe)
     print "total keypoints", total_features
-    nclusters = int(sqrt(no_of_clusters))
+    nclusters = no_of_clusters
+    # nclusters = int(sqrt(no_of_clusters))
     print "total clusters", nclusters
     features = dataframe['features'].tolist()
     # print features
@@ -240,7 +241,7 @@ def computeHistogram(dataframe,codebook):
 def trainModel(training_set, pipeline):
     # Learning Model
     print "learning model"
-    f = vstack(training_set["histograms"].values)
+    f = vstack(training_set["features"].values)
     print f
     model = pipeline.fit(f,  training_set["labels"])
     return model
@@ -249,7 +250,7 @@ def trainModel(training_set, pipeline):
 # Function to predict from creatives from learned model
 """
 def predictModel(test_set,model):
-    f = vstack(test_set["histograms"].values)
+    f = vstack(test_set["features"].values)
     print f
     predicted = model.predict(f)
     return predicted
@@ -301,10 +302,10 @@ Function for prediction and saving results
 def prediction(data_set, model, codebook, target_labels):
     print "----prediction----"
     # computing the visual word histogram for each image using the codebook
-    print "----Computing the histograms---"
-    data_set = computeHistogram(data_set,codebook)
-    print "first 5 histogram"
-    print data_set.head(5)
+    # print "----Computing the histograms---"
+    # data_set = computeHistogram(data_set,codebook)
+    # print "first 5 histogram"
+    # print data_set.head(5)
 
     data_set["predicted"] = predictModel(data_set,model)
     print data_set["predicted"]
@@ -347,31 +348,31 @@ def training(training_image_folder, split):
     else:
         training_set =  feature_dataframe.copy()
 
-
-    # ################## Coding and Pooling #################################
-    # computing the codebook for visual bag-of-words
-    print "----Computing the codebook---"
-    codebook = computeCodebook(training_set)
-
-    # save codebook
-    print "----Saving Codebook----"
-    filename = ml_model_path + '%s_coodebook.pkl'%datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-    saveModel(codebook,filename)
-
-    # computing the visual word histogram for each image using the codebook
-    print "----Computing the histograms---"
-    training_set = computeHistogram(training_set,codebook)
-    print "first 5 histogram"
-    print training_set.head(5)
+    codebook = []
+    # # ################## Coding and Pooling #################################
+    # # computing the codebook for visual bag-of-words
+    # print "----Computing the codebook---"
+    # codebook = computeCodebook(training_set)
+    #
+    # # save codebook
+    # print "----Saving Codebook----"
+    # filename = ml_model_path + '%s_coodebook.pkl'%datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+    # saveModel(codebook,filename)
+    #
+    # # computing the visual word histogram for each image using the codebook
+    # print "----Computing the histograms---"
+    # training_set = computeHistogram(training_set,codebook)
+    # print "first 5 histogram"
+    # print training_set.head(5)
 
     # define the pipeline
-    # pipeline = Pipeline([
-    # ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, n_iter=5, random_state=42))])
     pipeline = Pipeline([
-    ('clf', SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
-    decision_function_shape=None, degree=3, gamma='auto', kernel='rbf',
-    max_iter=-1, probability=False, random_state=None, shrinking=True,
-    tol=0.001, verbose=False))])
+    ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, n_iter=5, random_state=42))])
+    # pipeline = Pipeline([
+    # ('clf', SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+    # decision_function_shape=None, degree=3, gamma='auto', kernel='rbf',
+    # max_iter=-1, probability=False, random_state=None, shrinking=True,
+    # tol=0.001, verbose=False))])
 
     # get training model
     model = trainModel(training_set, pipeline)

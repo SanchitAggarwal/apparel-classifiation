@@ -133,7 +133,7 @@ if split > 0:
 
 ```
 
-#### **Experiment 1:** *Bag of Words on HoG Features + SVM - Binary Class - 30% Validation* ####
+#### **Experiment 1:** *HoG Features + SVM - Binary Class - 30% Validation* ####
 For a quick evaluation purpose and checking the pipeline, We just used two classes U neck and V neck with 20, 20 images in each set.
 
 *Results*:
@@ -145,7 +145,7 @@ For a quick evaluation purpose and checking the pipeline, We just used two class
 |**avg / total**|**0.76**      |**0.75**      |**0.75**      |**12**|
 
 #### **Experiment 2:** *Bag of Words on HoG Features  + SVM - 30% Validation* ####
-We then run the pipeline on 4 classes. The model is performing really bad. Hence We tried some improvements.
+We then run the pipeline on 4 classes with  Bag of words on Hog Features. The model is performing really bad. Hence We tried some improvements.
 
 |                      |precision|  recall|  f1-score|  support|
 | -------------        |:-------:| ------:| --------:|--------:|
