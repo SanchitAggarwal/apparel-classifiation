@@ -220,6 +220,17 @@ The results can be further improve by including other features and using differe
 |**Collar neck**      |  0.23     |1.00    | 0.37     |339        |
 |**avg / total**       |**0.05**   |**0.23**|**0.08**  |**1503**   |
 
+#### **Experiment 7:** *HoG Features + SVM - 30% Validation (with HoG on Skin Region )* ####
+We added a Skin Region detector and extracted HoG features only for Region with Skin in the image.
+We fed these features to SVM Classifier. We evaluated the new pipeline on dataset containing 2K images of U Neck and V Neck.
+
+*Results*:
+
+|               |precision|  recall|  f1-score|  support|
+| ------------- |:-------:| ------:| --------:|--------:|
+|**U Neck**     |  0.77   |  0.75  | 0.76     |        298|
+|**V Neck**     |0.63     | 0.66   | 0.64     |        192|
+|**avg / total**|**0.71** |**0.71**|**0.71**  |    **490**|
 
 
 #### **Conclusion** ###

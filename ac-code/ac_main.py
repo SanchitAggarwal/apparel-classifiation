@@ -123,6 +123,35 @@ def getBodyPart(image, cascade, min_size = (30,30)):
     print ("Number of Body Parts Detected: {}".format(len(final_bodyparts)))
     return final_bodyparts
 
+
+
+"""
+To detect the skin region in the image.
+"""
+def getSkinRegion(image):
+    print "extracting skin region in the image..."
+    # define the upper and lower boundaries of the HSV pixel
+    # intensities to be considered 'skin'
+    lower_skin_boundary = np.array([0, 48, 80], dtype = "uint8")
+    upper_skin_boundary = np.array([20, 255, 255], dtype = "uint8")
+
+    # resize the frame, convert it to the HSV color space,
+	# and determine the HSV pixel intensities that fall into
+	# the speicifed upper and lower boundaries
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    skin_mask = cv2.inRange(hsv_image, lower_skin_boundary, upper_skin_boundary)
+
+    # apply a series of erosions and dilations to the mask using an elliptical kernel
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+    skin_mask = cv2.erode(skin_mask, kernel, iterations = 2)
+    skin_mask = cv2.dilate(skin_mask, kernel, iterations = 2)
+
+    # blur the mask to help remove noise, then apply the mask to the frame
+    skin_mask = cv2.GaussianBlur(skin_mask, (3, 3), 0)
+    skin_image = cv2.bitwise_and(image, image, mask = skin_mask)
+    return skin_image
+
+
 '''
 Function to extract SIFT descriptors
 '''
@@ -181,6 +210,9 @@ def extractFeatures(imagefiles,labels):
         training_image = cv2.imread(imagefiles[index])
         training_image = preprocessImage(training_image,imagefiles[index].split('/')[-1])
         if training_image.size:
+            training_image = getSkinRegion(training_image)
+            skin_image_file_name = os.path.join(preprocess_path, 'skin_'+ imagefiles[index].split('/')[-1])
+            cv2.imwrite(skin_image_file_name,training_image)
             print training_image.shape
             training_image = getGray(training_image)
             hog_hist, hog_image = getHoG(training_image)
