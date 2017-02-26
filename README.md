@@ -233,6 +233,31 @@ We fed these features to SVM Classifier. We evaluated the new pipeline on datase
 |**avg / total**|**0.71** |**0.71**|**0.71**  |    **490**|
 
 
+
+#### **Experiment 8:** *HoG Features + SVM - 30% Validation (with HoG on Skin Region )* ####
+We added a Skin Region detector and extracted HoG features only for Region with Skin in the image.
+We fed these features to SVM Classifier. We evaluated the new pipeline on dataset containing 5K images of all attribute classification.
+The results can be further improved by combining both HoG and Color features, in addition with curve detection and parameter tuning.
+
+*Results*:
+
+
+|                      |precision|  recall|  f1-score|  support|
+| -------------        |:-------:| ------:| --------:|--------:|
+|**Round Neck**        |  0.33     |0.18    | 0.23     |85        |
+|**U Neck**            |  0.12     |0.09    | 0.11     |22        |
+|**Boat neck**         |  0.16     |0.16    | 0.16     |68        |
+|**chinese collarneck**|  0.31     |0.31   | 0.35    |236        |
+|**Low cut neck**      |  0.28     |0.25    | 0.26     |65        |
+|**V Neck**            |  0.22     |0.19    | 0.19     |29        |
+|**Square Neck**       |  0.00     |0.00     | 0.00     |2        |
+|**Square collar**     |   0.41     |0.60    | 0.49     |298        |
+|**Round collar**      |  0.47     |0.17    | 0.25     |208        |
+|**Collar neck**      |  0.54     |0.55    | 0.54     |316        |
+|**avg / total**       |**0.40**   |**0.39**|**0.38**  |**1329**   |
+
+
+
 #### **Conclusion** ###
 - A very basic pipeline for Apparel Attribute classification in Natural scenes is presented here. The algorithm first determine relevant region for Neck type classification by utilizing state of the art upper body detector. A HoG representation of the region is then used to learn a Bag of Words with a layer of Support Vector Machines for final classification.
 
