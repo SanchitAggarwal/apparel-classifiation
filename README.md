@@ -283,3 +283,5 @@ We can also use other features like **SURF**, **Self Similarity (SSD)**, **Local
 [2) Apparel Classification using CNNs] (http://cs231n.stanford.edu/reports2016/286_Report.pdf)
 
 [3) Style Finder: Fine-Grained Clothing Style Recognition and Retrieval] (http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.370.6283&rep=rep1&type=pdf)
+
+[4) Shape Features (https://math.uci.edu/icamp/summer/research_11/park/shape_descriptors_survey_part2.pdf)]
